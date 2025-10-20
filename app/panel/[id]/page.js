@@ -427,7 +427,6 @@ export default function FetalMonitor() {
         );
     };
 
-    console.log('GGGGGG',selectedExaminationData)
     const currentReportData = patientData.last_verdict
     return (
         <div className="fetal-monitor-container" ref={containerRef}>
