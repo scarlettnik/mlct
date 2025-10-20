@@ -488,9 +488,9 @@ export default function FetalMonitor() {
 
                         {/* --- РЕКОМЕНДАЦИИ --- */}
                         <h3 className="fm-subtitle">РЕКОМЕНДАЦИИ:</h3>
-                        {currentReportData.recommendations && currentReportData.recommendations.length > 0 ? (
+                        {currentReportData?.recommendations && currentReportData?.recommendations?.length > 0 ? (
                             <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
-                                {currentReportData.recommendations.map((item, index) => (
+                                {currentReportData?.recommendations?.map((item, index) => (
                                     <li key={`rec-${index}`}>{item}</li>
                                 ))}
                             </ul>
@@ -501,9 +501,9 @@ export default function FetalMonitor() {
                         <br/>
                         {/* --- ЗОНЫ РИСКА --- */}
                         <h3 className="fm-subtitle">ЗОНЫ РИСКА:</h3>
-                        {currentReportData.risk_zones && currentReportData.risk_zones.length > 0 ? (
+                        {currentReportData?.risk_zones && currentReportData?.risk_zones?.length > 0 ? (
                             <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
-                                {currentReportData.risk_zones.map((item, index) => (
+                                {currentReportData?.risk_zones.map((item, index) => (
                                     // Если это одна большая строка, лучше отобразить как P
                                     <li key={`risk-${index}`}>{item}</li>
                                 ))}
@@ -515,9 +515,9 @@ export default function FetalMonitor() {
                         <br/>
                         {/* --- ЧТО В НОРМЕ --- */}
                         <h3 className="fm-subtitle">ЧТО В НОРМЕ:</h3>
-                        {currentReportData.what_in_norm && currentReportData.what_in_norm.length > 0 ? (
+                        {currentReportData?.what_in_norm && currentReportData?.what_in_norm?.length > 0 ? (
                             <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
-                                {currentReportData.what_in_norm.map((item, index) => (
+                                {currentReportData?.what_in_norm?.map((item, index) => (
                                     <li key={`norm-${index}`}>{item}</li>
                                 ))}
                             </ul>
@@ -598,8 +598,6 @@ export default function FetalMonitor() {
                         <p>Детали исследования появятся после выбора записи в левой панели.</p>
                     )}
                 </div>
-
-
             </main>
         </div>
     );
