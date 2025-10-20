@@ -90,6 +90,7 @@ export default function FetalMonitor() {
         exam: null
     });
     const [selectedExaminationDetails, setSelectedExaminationDetails] = useState(null);
+    const [isSaving, setIsSaving] = useState(false); // Флаг для кнопки сохранения
 
     const heartRateData = useMemo(() => {
         const bpmData = selectedExaminationData.part?.data?.bpm;
@@ -111,6 +112,7 @@ export default function FetalMonitor() {
         setSelectedExaminationDetails(partData);
     }, []);
 
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
     const fetchPatientData = useCallback(async (isInitialLoad = false) => {
         let isMounted = true;
@@ -127,7 +129,7 @@ export default function FetalMonitor() {
         }
 
         try {
-            const response = await fetch(`https://hack.nearby-project.ru/v1/patients/${patientId}`);
+            const response = await fetch(`${baseUrl}/v1/patients/${patientId}`);
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);
@@ -144,6 +146,10 @@ export default function FetalMonitor() {
                         part: { data: { bpm: [], uterus: [] } },
                         exam: firstExam
                     });
+                }
+                if (isInitialLoad) {
+                    setFreeComment(data.comment || '');
+                    setIsCommentLoading(false);
                 }
             }
 
@@ -163,7 +169,7 @@ export default function FetalMonitor() {
         if (patientData && patientData.id && patientData.misc_data?.unread) {
             const patchUnreadStatus = async () => {
                 try {
-                    const response = await fetch(`https://hack.nearby-project.ru/v1/patients/${patientData.id}`, {
+                    const response = await fetch(`${baseUrl}/v1/patients/${patientData.id}`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -203,16 +209,21 @@ export default function FetalMonitor() {
         fetchPatientData(true);
     }, [fetchPatientData]);
 
-    useEffect(() => {
-        // 💡 Замените эту логику на ваш реальный GET-запрос
-        const initialValue = "Общее состояние: все среднее. Требуется усиленный мониторинг.";
+    const handleSaveComment = useCallback(async () => {
+        if (!patientId || isSaving) return;
 
-        setTimeout(() => {
-            setFreeComment(initialValue);
-            setIsCommentLoading(false);
-        }, 500);
-    }, []);
-
+        setIsSaving(true);
+        try {
+            const response = await fetch(`${baseUrl}/v1/patients/${patientId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: freeComment })
+            });
+        } catch (error) {
+        } finally {
+            setIsSaving(false);
+        }
+    }, [patientId, freeComment, isSaving, baseUrl]);
 
     const dynamicAnnotations = useMemo(() => {
         if (!selectedExaminationDetails?.intervals) return [];
@@ -319,8 +330,6 @@ export default function FetalMonitor() {
     const chartPlaceholder = chartPlaceholderText ? (
         <p className="chart-status-text">{chartPlaceholderText}</p>
     ) : null;
-
-    const [graphMin, graphMax] = zoomRange || [xMin, xMax];
 
     const baseX = {
         type: "linear",
@@ -536,23 +545,24 @@ export default function FetalMonitor() {
                         <textarea
                             value={isCommentLoading ? 'Загрузка...' : freeComment}
                             onChange={(e) => setFreeComment(e.target.value)}
-                            disabled={isCommentLoading}
+                            disabled={isCommentLoading || isSaving}
                             rows={6}
                             placeholder="Введите здесь свой комментарий..."
                             style={{
-                                color: 'black',
-                                overflowY: 'auto',
-                                width: '100%',
-                                padding: '8px',
-                                borderRadius: '5px',
-                                border: '1px solid #ccc',
-                                fontSize: '14px',
-                                resize: 'none',
-                                backgroundColor: 'white',
-                            }}
-                        />
+                            color: 'black',
+                            overflowY: 'auto',
+                            width: '100%',
+                            padding: '8px',
+                            borderRadius: '5px',
+                            border: '1px solid #ccc',
+                            fontSize: '14px',
+                            resize: 'none',
+                            backgroundColor: 'white',
+                        }}
+                            />
 
                         <button
+                            onClick={handleSaveComment}
                             disabled={isCommentLoading}
                             style={{
                                 float: 'left',
@@ -566,7 +576,7 @@ export default function FetalMonitor() {
                                 transition: 'background-color 0.2s'
                             }}
                         >
-                            Сохранить комментарий
+                            {isSaving ? 'Сохранение...' : 'Сохранить комментарий'}
                         </button>
                     </div>
                 </div>

@@ -5,6 +5,8 @@ import EditPatientModal from "@/app/components/EditPatientModal";
 const MonInfo = ({patientId, onClose, isOpen}) => {
     const [patient, setPatient] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+
 
     const fetchPatientData = useCallback(async () => { // Removed isInitialLoad as it wasn't used
         if (!patientId) {
@@ -13,7 +15,7 @@ const MonInfo = ({patientId, onClose, isOpen}) => {
         }
 
         try {
-            const response = await fetch(`https://hack.nearby-project.ru/v1/patients/${patientId}`);
+            const response = await fetch(`${baseUrl}/v1/patients/${patientId}`);
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);

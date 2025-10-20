@@ -5,9 +5,11 @@ import CreatableSelect from "react-select/creatable";
 import "../UploadModal.css";
 import VirtualKeyboard from "./VirtualKeyBoard";
 
+const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+
 const fetchPatients = async () => {
     try {
-        const url = "https://hack.nearby-project.ru/v1/patients";
+        const url = `${baseUrl}/v1/patients`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -98,7 +100,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }) {
 
         const formData = new FormData();
         formData.append("file", zipFile, zipFile.name);
-        const url = `https://hack.nearby-project.ru/v1/patients/${trimmedPatientId}/examinations`;
+        const url = `${baseUrl}/v1/patients/${trimmedPatientId}/examinations`;
 
         try {
             const response = await fetch(url, {

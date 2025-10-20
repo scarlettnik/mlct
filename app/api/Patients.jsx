@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
 
+const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
-const useUsers = (url = 'https://hack.nearby-project.ru/v1/patients') => {
+const useUsers = (url = `${baseUrl}/v1/patients`) => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);

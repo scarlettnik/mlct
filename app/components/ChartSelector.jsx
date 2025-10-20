@@ -80,6 +80,9 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
         };
     }, [data, loading]);
 
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+
+
     const handleChartClick = useCallback(async (examinationId, partIndex, recordId) => {
         const selectedPart = { examinationId, partIndex, recordId };
         setSelected(selectedPart);
@@ -89,13 +92,13 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
 
         try {
             const resPart = await fetch(
-                `https://hack.nearby-project.ru/v1/patients/${patient.id}/examinations/${examinationId}/part/${partIndex}`
+                `${baseUrl}/v1/patients/${patient.id}/examinations/${examinationId}/part/${partIndex}`
             );
             jsonPart = await resPart.json();
             console.log(`Данные части #${partIndex}:`, jsonPart);
 
             const resExam = await fetch(
-                `https://hack.nearby-project.ru/v1/patients/${patient.id}/examinations/${examinationId}`
+                `${baseUrl}/v1/patients/${patient.id}/examinations/${examinationId}`
             );
             jsonExam = await resExam.json();
             console.log("Полное описание исследования:", jsonExam);

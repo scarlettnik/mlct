@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 
-const useUsers = (url = 'https://hack.nearby-project.ru/v1/patients') => {
+const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+
+const useUsers = (url = `${baseUrl}/v1/patients`) => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);

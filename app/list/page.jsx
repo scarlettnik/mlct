@@ -31,13 +31,13 @@ const UserBentoCard = ({ user, index }) => {
                 <div className="card-info">
                     <div className="card-header">
                         <div className="user-avatar">
-                            {user?.name?.charAt(0) || '0'}
+                            {user?.misc_data?.name?.charAt(0) || '0'}
                         </div>
-                        <h3 className="user-name">{user?.name || `Фамилмия имя отчество ${user.id}`}</h3>
+                        <h3 className="user-name">{user?.misc_data?.name || `Фамилмия имя отчество ${user.id}`}</h3>
                     </div>
 
-                    <p className={`user-status ${user?.name ? 'text-completed' : 'text-pending'}`}>
-                        {user?.name ? "Данные заполнены" : "Данные не заполнены"}
+                    <p className={`user-status ${user?.misc_data?.name ? 'text-completed' : 'text-pending'}`}>
+                        {user?.misc_data?.name ? "Данные заполнены" : "Данные не заполнены"}
                     </p>
                 </div>
                 {user.misc_data.unread && <div style={{
