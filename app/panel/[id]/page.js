@@ -214,7 +214,6 @@ export default function FetalMonitor() {
     }, []);
 
 
-    // 🔥 Динамические аннотации из выбранных данных
     const dynamicAnnotations = useMemo(() => {
         if (!selectedExaminationDetails?.intervals) return [];
         return selectedExaminationDetails.intervals.map((int, idx) => ({
