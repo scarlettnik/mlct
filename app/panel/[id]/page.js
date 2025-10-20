@@ -486,7 +486,6 @@ export default function FetalMonitor() {
                 <div className="bento-box fm-result" style={{marginTop: '-16px', marginBottom: '20px'}}>
                     <div style={{padding: '10px', borderRadius: '5px'}}>
 
-                        {/* --- РЕКОМЕНДАЦИИ --- */}
                         <h3 className="fm-subtitle">РЕКОМЕНДАЦИИ:</h3>
                         {currentReportData?.recommendations && currentReportData?.recommendations?.length > 0 ? (
                             <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
