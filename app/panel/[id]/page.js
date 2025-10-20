@@ -102,11 +102,15 @@ export default function FetalMonitor() {
     }, [selectedExaminationData.part]);
 
     const selectChart = useCallback((chartId, partData, examData) => {
+        console.log("📄 Получен jsonExam из ChartSelector:", examData); // <-- вот эта строка
+        console.log("📊 Получен partData:", partData);
+
         setCurrentChartId(chartId);
         const safePartData = partData?.data ? partData : { data: { bpm: [], uterus: [] } };
         setSelectedExaminationData({ part: safePartData, exam: examData });
         setSelectedExaminationDetails(partData);
     }, []);
+
 
     const fetchPatientData = useCallback(async (isInitialLoad = false) => {
         let isMounted = true;
@@ -423,31 +427,7 @@ export default function FetalMonitor() {
         );
     };
 
-
-
-// Функция сохранения (PUT/POST)
-    const handleCommentSave = () => {
-        // 💡 Здесь должна быть логика сохранения (например, fetch или axios)
-        console.log("Сохранение нового комментария:", freeComment);
-
-        // Добавьте здесь ваш PUT/POST запрос. Например:
-        /*
-        fetch('/api/save-comment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ comment: freeComment, examId: yourExamId })
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Комментарий сохранен!');
-            }
-        });
-        */
-
-        alert('Комментарий сохранен: ' + freeComment);
-    };
-
-    console.log(patientData)
+    console.log('GGGGGG',selectedExaminationData)
     const currentReportData = patientData.last_verdict
     return (
         <div className="fetal-monitor-container" ref={containerRef}>
@@ -462,7 +442,7 @@ export default function FetalMonitor() {
             <main className="fm-main-content">
                 <PatientInfo patient={patientData} onDataUpdate={() => fetchPatientData(false)}/>
 
-                <ReportBlock reportData={selectedExaminationDetails}/>
+                <ReportBlock reportData={selectedExaminationData?.exam}/>
                 <aside className="bento-box fm-chart-control-area">
                     <ChartControl
                         label="Управление масштабом"
@@ -576,7 +556,6 @@ export default function FetalMonitor() {
                         />
 
                         <button
-                            onClick={handleCommentSave}
                             disabled={isCommentLoading}
                             style={{
                                 float: 'left',
