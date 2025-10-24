@@ -1,228 +1,473 @@
 .fetal-monitor-container {
-    background-color: #f5f5f5f5;
-    color: black;
     min-height: 100vh;
-    padding: 16px;
+    padding: clamp(14px, 2vw, 24px);
+    color: var(--text);
+    background:
+        linear-gradient(180deg, rgba(246, 250, 249, 0.98), rgba(240, 247, 245, 0.96)),
+        repeating-linear-gradient(90deg, rgba(19, 95, 94, 0.04) 0 1px, transparent 1px 72px);
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
 .bento-box {
-    border-radius: 12px;
-    padding: 16px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    float: left;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
 }
 
 .fm-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.bento-header {
     grid-column: 1 / -1;
 }
 
-.fm-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--title-color);
+.fm-header-row {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
 
-.fm-controls .fm-button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    margin-left: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
+.fm-title {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: clamp(1.55rem, 3vw, 2.45rem);
+    line-height: 1;
+    font-weight: 800;
 }
-.fm-controls .fm-button.active {
-    background: #0056b3;
+
+.fm-header-caption,
+.fm-info-time {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.fm-header-caption {
+    margin-top: 8px;
+}
+
+.fm-info-time {
+    white-space: nowrap;
+}
+
+.fm-action-button,
+.fm-print-button,
+.edit-button,
+.comment-save-button {
+    min-height: 40px;
+    border: 1px solid rgba(19, 95, 94, 0.18);
+    border-radius: 8px;
+    padding: 9px 14px;
+    background: var(--accent);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 800;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fm-action-button:hover,
+.fm-print-button:hover,
+.edit-button:hover,
+.comment-save-button:hover {
+    transform: translateY(-1px);
+    background: var(--accent-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.fm-action-button:disabled,
+.comment-save-button:disabled {
+    cursor: not-allowed;
+    background: #a8b3bd;
+    transform: none;
+    box-shadow: none;
 }
 
 .fm-main-content {
     flex-grow: 1;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-columns: minmax(280px, 1fr) minmax(480px, 2.2fr) minmax(300px, 1fr);
+    grid-template-areas:
+        "patient report control"
+        "store graphHr predict"
+        "store graphUc predict"
+        "result result comment";
     gap: 16px;
+    align-items: stretch;
 }
 
 .fm-patient-info {
-    grid-area: 1 / 1 / 2 / 4;
+    grid-area: patient;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fm-report-block {
+    grid-area: report;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .fm-chart-control-area {
-    grid-area: 1 / 4 / 2 / 7;
-    height: 90px;
-    padding: 16px 8px;
+    grid-area: control;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: white;
-    border: var(--bento-border);
-    box-shadow: var(--bento-shadow);
-    align-self: end;
+    align-items: center;
 }
 
-.fm-predict {
-    grid-area: 2 / 6 / 4 / 7;
-    background-color: pink;
-}
 .fm-store {
-    grid-area: 2 / 1 / 4 / 2;
-    background-color: white;
-    border-radius: 25px;
-}
-
-.fm-result {
-    background-color: white;
-    grid-area: 5 / 1 / 8 / 4;
-}
-.fm-comment {
-    margin-top: -16px;
-    background-color: white;
-    grid-area: 5 / 4 / 6 / 7;
-}
-
-.fm-install-but {
-    background-color: white;
-    grid-area: 6 / 4 / 7 / 7;
-}
-
-.but {
-    color: white;
-    font-size: 20px;
-    font-weight: 500;
-    background-color: rgba(0, 123, 255, 0.71);
-}
-
-.fm-install-but2 {
-    grid-area: 7 / 4 / 8 / 7;
-    margin-bottom: 20px;
-}
-
-.fm-current-readings {
-    grid-area: 2 / 1 / 3 / 2; /* R2 C1 */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    text-align: center;
-    background-color: var(--bento-bg);
-    border: var(--bento-border);
-    box-shadow: var(--bento-shadow);
-    border-radius: 12px;
-    padding: 16px;
-}
-
-.fm-graph-uc {
-    grid-area: 3 / 2 / 4 / 6; /* R2 C2-C6 (График сокращений) */
-    position: relative;
-    height: 40vh;
-    padding-bottom: 30px;
-    background-color: white;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    border-radius: 12px;
-    border: var(--bento-border);
-    box-shadow: var(--bento-shadow);
+    grid-area: store;
+    min-width: 0;
 }
 
 .fm-graph-hr {
-    grid-area: 2 / 2 / 3 / 6; /* R3 C1-C6 (График ЧСС) */
-    height: 40vh;
+    grid-area: graphHr;
+}
+
+.fm-graph-uc {
+    grid-area: graphUc;
+}
+
+.fm-graph {
     position: relative;
-    padding-bottom: 30px;
-    background-color: white;
-    overflow-x: scroll;
+    min-height: 300px;
+    overflow-x: auto;
     overflow-y: hidden;
-    border-radius: 12px;
-    border: var(--bento-border);
-    box-shadow: var(--bento-shadow);
 }
 
-.fm-report-block {
-    grid-area: 1 / 4 / 1 / 7;
-    height: calc(100% - 100px);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    font-size: 0.95rem;
-    background-color: white;
-    color: black;
-}
-
-
-.fm-graph > div {
+.fm-graph > div,
+.chart-wrapper {
     height: 100% !important;
 }
-.reading-value {
-    font-size: 3rem;
-    font-weight: bold;
-    margin-top: 5px;
-}
-.reading-hr { color: #84cc16;}
-.reading-uc { color: #7197f8;}
 
-.fm-report-block {
-    line-height: 1.6;
+.chart-wrapper {
+    min-width: 100%;
 }
+
+.chart-status-text {
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.45;
+}
+
+.fm-result {
+    grid-area: result;
+}
+
+.fm-comment {
+    grid-area: comment;
+}
+
+.fm-predict {
+    grid-area: predict;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 .fm-subtitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--title-color);
-    letter-spacing: 0.5px;
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 0.86rem;
+    line-height: 1.3;
+    font-weight: 800;
     text-transform: uppercase;
 }
-.report-period {
-    font-style: italic;
-    margin-bottom: 15px;
-    color: #007bff;
-    font-weight: bold;
-}
-.report-metric {
+
+.fm-patient-header,
+.report-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    padding: 2px 0;
-}
-.report-submetric {
-    padding-left: 20px;
-    font-size: 0.9rem;
-    color: black;
-}
-.metric-value {
-    font-weight: bold;
-    margin-left: 10px;
-}
-.report-pathology-status {
-    margin-top: 15px;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
+    gap: 14px;
 }
 
-.pathology-label { color: black }
+.fm-patient-name {
+    margin: 0;
+    color: var(--accent);
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.fm-details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--surface-soft);
+}
+
+.fm-patient-detail {
+    display: grid;
+    grid-template-columns: minmax(128px, 0.65fr) minmax(0, 1fr);
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+    line-height: 1.4;
+}
+
+.fm-patient-detail p {
+    margin: 0;
+}
+
+.fm-patient-detail span {
+    color: var(--text-strong);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.fm-section-title {
+    margin: 4px 0 10px;
+    color: var(--text-strong);
+    font-size: 0.94rem;
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.fm-bga-section {
+    overflow-x: auto;
+}
+
+.fm-bga-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 460px;
+    overflow: hidden;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.fm-bga-table th,
+.fm-bga-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.fm-bga-table th {
+    color: var(--text-strong);
+    background: #edf6f5;
+    font-weight: 800;
+}
+
+.fm-bga-table td {
+    color: var(--text);
+    background: #ffffff;
+}
+
+.report-metric,
+.report-submetric {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.94rem;
+    line-height: 1.35;
+}
+
+.report-submetric {
+    padding-left: 18px;
+    color: var(--text-muted);
+}
+
+.metric-value {
+    color: var(--text-strong);
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.report-pathology-status {
+    margin: 8px 0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 800;
+}
+
+.pathology-label {
+    color: var(--text-strong);
+}
 
 .path-normal {
-    background-color: rgba(50, 255, 50, 0.59);
-    border: 1px solid #38c172;
-    color: black;
+    background: rgba(25, 135, 84, 0.12);
+    color: var(--success);
 }
 
 .path-suspicious {
-    background-color: #382c10;
-    border: 1px solid #ffcc00;
-    color: #ffcc00;
+    background: rgba(216, 148, 23, 0.15);
+    color: var(--warning);
 }
 
 .path-pathological {
-    background-color: #301010;
-    border: 1px solid #e3342f;
-    color: #e3342f;
+    background: rgba(194, 65, 50, 0.12);
+    color: var(--danger);
+}
+
+.time-metric {
+    flex-direction: column;
+}
+
+.time-submetric {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-muted);
+}
+
+.chart-control-content {
+    width: 100%;
+}
+
+.zoom-slider-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(140px, 1fr);
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.zoom-label {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.zoom-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    outline: none;
+    appearance: none;
+    background: linear-gradient(90deg, rgba(19, 115, 111, 0.28), rgba(39, 104, 123, 0.24));
+    cursor: pointer;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #ffffff;
+    border-radius: 999px;
+    appearance: none;
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(19, 95, 94, 0.28);
+}
+
+.zoom-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #ffffff;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(19, 95, 94, 0.28);
+}
+
+.recommendation-panel,
+.comment-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.clinical-list {
+    margin-left: 18px;
+    color: var(--text);
+    line-height: 1.55;
+}
+
+.clinical-list li + li {
+    margin-top: 6px;
+}
+
+.comment-panel h4 {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 1rem;
+}
+
+.doctor-comment-textarea {
+    width: 100%;
+    min-height: 150px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    resize: vertical;
+    color: var(--text-strong);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.doctor-comment-textarea:focus {
+    outline: none;
+    border-color: rgba(19, 115, 111, 0.45);
+    box-shadow: 0 0 0 4px rgba(19, 115, 111, 0.09);
+}
+
+.comment-save-button {
+    align-self: flex-start;
+}
+
+.annotation-title {
+    color: var(--text-strong);
+    font-size: 1rem;
+}
+
+.annotation-description,
+.annotation-placeholder,
+.metadata-list,
+.fm-predict p {
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.metadata-list {
+    font-size: 0.9rem;
+}
+
+.metadata-list p {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.metadata-list strong {
+    color: var(--text-strong);
+    text-transform: capitalize;
+}
+
+.section-divider {
+    width: 100%;
+    height: 1px;
+    border: 0;
+    background: var(--border);
+    margin: 4px 0;
 }
 
 .loading-screen {
@@ -230,350 +475,122 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #000;
-    color: #fff;
-    font-size: 1.5rem;
+    background: var(--background);
+    color: var(--text-strong);
+    font-size: 1.2rem;
 }
 
-.chart-inner {
-    height: 100%;
+.error-state-text {
+    color: var(--danger);
+    font-weight: 800;
+    text-align: center;
 }
 
 .fm-graph-hr::-webkit-scrollbar,
-.fm-graph-uc::-webkit-scrollbar {
+.fm-graph-uc::-webkit-scrollbar,
+.fm-bga-section::-webkit-scrollbar {
     height: 8px;
 }
 
 .fm-graph-hr::-webkit-scrollbar-thumb,
-.fm-graph-uc::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
-    border-radius: 4px;
-    border: 1px solid #1a1a1a;
+.fm-graph-uc::-webkit-scrollbar-thumb,
+.fm-bga-section::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: #9db2b0;
 }
 
 .fm-graph-hr::-webkit-scrollbar-track,
-.fm-graph-uc::-webkit-scrollbar-track {
-    background: #1a1a1a;
+.fm-graph-uc::-webkit-scrollbar-track,
+.fm-bga-section::-webkit-scrollbar-track {
+    background: #edf3f2;
 }
 
 .fm-graph-hr,
-.fm-graph-uc {
+.fm-graph-uc,
+.fm-bga-section {
     scrollbar-width: thin;
-    scrollbar-color: #4a4a4a #1a1a1a;
+    scrollbar-color: #9db2b0 #edf3f2;
 }
 
-
-:root {
-    --bento-bg: #ffffff;
-    --bento-border: 1px solid #e0e0e0;
-    --bento-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --title-color: #333333;
-    --detail-label-color: #757575;
-    --detail-value-color: #1a1a1a;
-    --table-header-bg: #f5f5f5;
-    --font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-}
-
-.fm-patient-info {
-    padding: 24px;
-    border-radius: 12px;
-    background-color: var(--bento-bg);
-    border: var(--bento-border);
-    box-shadow: var(--bento-shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.fm-patient-info .fm-subtitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--title-color);
-    margin: 0;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #f0f0f0;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.fm-patient-info .fm-patient-name {
-    font-size: 24px;
-    font-weight: 700;
-    color: #007bff;
-    margin: 0 0 10px 0;
-}
-
-.fm-patient-info .fm-details-group {
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 12px;
-    background-color: #fcfcfc;
-}
-
-.fm-patient-info .fm-patient-detail {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    margin: 0;
-    font-size: 15px;
-    color: var(--detail-label-color);
-}
-
-.fm-patient-info .fm-patient-detail span {
-    font-weight: 600;
-    color: var(--detail-value-color);
-}
-
-.fm-patient-info .fm-details-group .fm-patient-detail:last-of-type {
-    padding-bottom: 0;
-}
-
-.fm-patient-info .fm-section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--title-color);
-    margin: 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.fm-bga-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 14px;
-    background-color: white;
-}
-
-.fm-bga-table thead th {
-    background-color: var(--table-header-bg);
-    color: var(--title-color);
-    padding: 10px 12px;
-    text-align: left;
-    font-weight: 600;
-    border-bottom: 2px solid #ccc;
-}
-
-.fm-bga-table tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    color: var(--detail-value-color);
-}
-
-.fm-bga-table tbody tr td:first-child {
-    font-weight: 500;
-    color: var(--detail-label-color);
-}
-
-.fm-bga-table tbody tr td:nth-child(2) {
-    font-weight: 700;
-    color: var(--detail-value-color);
-}
-
-.fm-bga-table tbody tr:nth-child(even) {
-    background-color: #fafafa;
-}
-
-.fm-bga-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.zoom-slider-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 1%;
-}
-
-.zoom-label {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-bottom: 5px;
-    text-align: center
-}
-
-.zoom-slider {
-    -webkit-appearance: none;
-    width: 70%;
-    height: 8px;
-    background: #e0e0e0;
-    border-radius: 4px;
-    outline: none;
-    opacity: 0.9;
-    transition: opacity .2s;
-    cursor: pointer;
-    margin: 0 0 0 5%;
-}
-
-.zoom-slider:hover {
-    opacity: 1;
-}
-
-.zoom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #007bff;
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-.zoom-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #007bff;
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-/* --- АДАПТИВНОСТЬ: ПЛАНШЕТЫ И ТЕЛЕФОНЫ (max-width: 768px) --- */
-@media (max-width: 768px) {
-    .fetal-monitor-container {
-        padding: 10px;
-    }
-
-    /* 1. Стек элементов в заголовке */
-    .fm-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .fm-controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        width: 100%;
-    }
-    .fm-controls .fm-button {
-        margin-left: 0;
-        flex-grow: 1; /* Кнопки заполняют доступное пространство */
-        font-size: 0.9rem;
-    }
-
-    /* 2. Переключение на 1-колоночную сетку */
-    .fm-main-content {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
-        gap: 10px;
-    }
-
-    /* 3. Сброс grid-area и укладка блоков вертикально */
-    .fm-patient-info,
-    .fm-chart-control-area,
-    .fm-current-readings,
-    .fm-graph-uc,
-    .fm-graph-hr {
-        grid-area: auto; /* Сброс к автоматическому потоку */
-        width: 100%;
-    }
-
-    /* 4. Настройки показаний (делаем горизонтальными) */
-    .fm-current-readings {
-        flex-direction: row;
-        justify-content: space-around;
-        padding: 15px 10px;
-    }
-    .reading-value {
-        font-size: 2rem; /* Уменьшаем размер текста показаний */
-    }
-
-    /* 5. Настройки графиков (уменьшаем высоту) */
-    .fm-graph-uc {
-        height: 20vh;
-    }
-    .fm-graph-hr {
-        height: 30vh;
-    }
-
-    .fm-chart-control-area {
-        height: auto;
-        min-height: 80px;
-    }
-    .zoom-slider-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    .zoom-slider {
-        width: 100%;
-        margin: 0;
-    }
-    .fm-store {
-        grid-area: 3 / 1 / 5 / 2 ;
-    }
-    .fm-predict {
-        grid-area: 12 / 1 / 5 / 2 ;
-    }
-}
-
-@media (max-width: 480px) {
-    .fm-title {
-        font-size: 1.3rem;
-    }
-    .reading-value {
-        font-size: 1.5rem; /* Еще меньше для самых маленьких экранов */
-    }
-
-    .fm-current-readings {
-        flex-direction: column;
-        text-align: left;
-    }
-    .fm-current-readings div {
-        margin-bottom: 5px;
-    }
-
-    .fm-bga-table {
-        font-size: 12px;
-    }
-
-    .fm-bga-table thead th,
-    .fm-bga-table tbody td {
-        padding: 8px 10px;
-    }
-    .fm-report-block {
-        height: 100%;
-    }
-}
-
-.fm-graph-hr::-webkit-scrollbar-thumb,
-.fm-graph-uc::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
-    border-radius: 4px;
-    border: 1px solid #1a1a1a;
-}
-
-
-
-.fm-graph-hr::-webkit-scrollbar-track,
-.fm-graph-uc::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-
-
-.fm-graph-hr,
-.fm-graph-uc {
-    scrollbar-width: thin;
-    scrollbar-color: black white;
-}
-
-/* Для Chrome, Safari, Edge, Opera */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
-/* Для Firefox */
 input[type=number] {
-    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
+@media (max-width: 1320px) {
+    .fm-main-content {
+        grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.55fr);
+        grid-template-areas:
+            "patient report"
+            "control control"
+            "store graphHr"
+            "store graphUc"
+            "predict predict"
+            "result comment";
+    }
+}
 
+@media (max-width: 900px) {
+    .fetal-monitor-container {
+        padding: 12px;
+    }
+
+    .fm-header,
+    .fm-header-row,
+    .fm-patient-header,
+    .report-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .fm-info-time {
+        white-space: normal;
+    }
+
+    .fm-main-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "patient"
+            "report"
+            "control"
+            "store"
+            "graphHr"
+            "graphUc"
+            "predict"
+            "result"
+            "comment";
+        gap: 12px;
+    }
+
+    .fm-graph {
+        min-height: 240px;
+    }
+
+    .zoom-slider-container {
+        grid-template-columns: 1fr;
+    }
+
+    .fm-patient-detail,
+    .metadata-list p {
+        grid-template-columns: 1fr;
+        display: grid;
+        gap: 4px;
+    }
+
+    .report-metric,
+    .report-submetric,
+    .time-submetric,
+    .report-pathology-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .metric-value {
+        text-align: left;
+    }
+}

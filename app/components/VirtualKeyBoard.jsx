@@ -1,23 +1,21 @@
 import React from 'react';
 
-// Клавиши для числовой клавиатуры
-const keys = [
+const defaultKeys = [
     '1', '2', '3',
     '4', '5', '6',
     '7', '8', '9',
     '0', 'Backspace', 'Done'
 ];
 
-export default function VirtualKeyboard({ onKeyPress, onDone, targetValue }) {
+export default function VirtualKeyboard({ onKeyPress, onDone, targetValue, keys = defaultKeys }) {
 
-    // Обработка нажатия клавиши
     const handleKeyClick = (key) => {
         if (key === 'Backspace') {
-            onKeyPress(targetValue.slice(0, -1)); // Удалить последний символ
+            onKeyPress(targetValue.slice(0, -1));
         } else if (key === 'Done') {
-            onDone(); // Закрыть клавиатуру
+            onDone?.();
         } else {
-            onKeyPress(targetValue + key); // Добавить символ
+            onKeyPress(targetValue + key);
         }
     };
 
@@ -29,7 +27,7 @@ export default function VirtualKeyboard({ onKeyPress, onDone, targetValue }) {
                         key={key}
                         className={`key-button ${key === 'Backspace' ? 'key-backspace' : ''} ${key === 'Done' ? 'key-done' : ''}`}
                         onClick={() => handleKeyClick(key)}
-                        type="button" // Важно для React, чтобы не срабатывал submit формы
+                        type="button"
                     >
                         {key === 'Backspace' ? '⌫' : key}
                     </button>

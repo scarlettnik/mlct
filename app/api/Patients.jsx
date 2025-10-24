@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
+import { apiUrl } from "@/app/lib/api";
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
-
-const useUsers = (url = `${baseUrl}/v1/patients`) => {
+const useUsers = (url = apiUrl("/v1/patients")) => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -17,9 +15,7 @@ const useUsers = (url = `${baseUrl}/v1/patients`) => {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
             const responseData = await response.json();
-            console.log("Received data:", responseData);
             setUsers(responseData.items);
-            console.log(users);
 
         } catch (err) {
             console.error("Error fetching data:", err);

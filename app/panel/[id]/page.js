@@ -17,6 +17,7 @@ import ReportBlock from "@/app/components/ReportBlock";
 import ChartSelector from "@/app/components/ChartSelector";
 import PatientInfo from "@/app/components/PatientInfo";
 import { useParams, useRouter } from "next/navigation";
+import { apiUrl } from "@/app/lib/api";
 
 ChartJS.register(
     CategoryScale,
@@ -40,7 +41,7 @@ const ChartControl = ({ label, currentWidth, setWidth }) => {
     const maxWidth = 400;
 
     return (
-        <div className="bento-box">
+        <div className="chart-control-content">
             <h2 className="fm-subtitle">{label}</h2>
             <div className="zoom-slider-container">
                 <span className="zoom-label">Ширина графика ({currentWidth}%)</span>
@@ -64,8 +65,8 @@ const transformChartData = (jsonArr) => {
     return jsonArr
         .filter(item => item && item.length === 2 && typeof item[0] === 'number' && typeof item[1] === 'number')
         .map(item => ({
-            time_sec: item[0], // Время (X)
-            value: item[1]      // Значение (Y)
+            time_sec: item[0],
+            value: item[1]
         }));
 };
 
@@ -90,7 +91,7 @@ export default function FetalMonitor() {
         exam: null
     });
     const [selectedExaminationDetails, setSelectedExaminationDetails] = useState(null);
-    const [isSaving, setIsSaving] = useState(false); // Флаг для кнопки сохранения
+    const [isSaving, setIsSaving] = useState(false);
 
     const heartRateData = useMemo(() => {
         const bpmData = selectedExaminationData.part?.data?.bpm;
@@ -103,16 +104,14 @@ export default function FetalMonitor() {
     }, [selectedExaminationData.part]);
 
     const selectChart = useCallback((chartId, partData, examData) => {
-        console.log("📄 Получен jsonExam из ChartSelector:", examData); // <-- вот эта строка
-        console.log("📊 Получен partData:", partData);
-
         setCurrentChartId(chartId);
         const safePartData = partData?.data ? partData : { data: { bpm: [], uterus: [] } };
         setSelectedExaminationData({ part: safePartData, exam: examData });
         setSelectedExaminationDetails(partData);
     }, []);
 
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+    const patientDataId = patientData.id;
+    const patientDataUnread = patientData.misc_data?.unread;
 
     const fetchPatientData = useCallback(async (isInitialLoad = false) => {
         let isMounted = true;
@@ -129,7 +128,7 @@ export default function FetalMonitor() {
         }
 
         try {
-            const response = await fetch(`${baseUrl}/v1/patients/${patientId}`);
+            const response = await fetch(apiUrl(`/v1/patients/${patientId}`));
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);
@@ -166,10 +165,10 @@ export default function FetalMonitor() {
     }, [patientId]);
 
     useEffect(() => {
-        if (patientData && patientData.id && patientData.misc_data?.unread) {
+        if (patientDataId && patientDataUnread) {
             const patchUnreadStatus = async () => {
                 try {
-                    const response = await fetch(`${baseUrl}/v1/patients/${patientData.id}`, {
+                    const response = await fetch(apiUrl(`/v1/patients/${patientDataId}`), {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -182,7 +181,7 @@ export default function FetalMonitor() {
                     });
 
                     if (!response.ok) {
-                        console.warn(`Не удалось обновить статус 'unread' для ${patientData.id}: ${response.status}`);
+                        console.warn(`Не удалось обновить статус 'unread' для ${patientDataId}: ${response.status}`);
                     }
 
                     setPatientData(prevData => ({
@@ -200,7 +199,7 @@ export default function FetalMonitor() {
 
             patchUnreadStatus();
         }
-    }, [patientData.id, patientData.misc_data?.unread]); // Зависит от ID и текущего статуса unread
+    }, [patientDataId, patientDataUnread]);
 
     const [freeComment, setFreeComment] = useState('Ожидание загрузки комментария...');
     const [isCommentLoading, setIsCommentLoading] = useState(true);
@@ -214,7 +213,7 @@ export default function FetalMonitor() {
 
         setIsSaving(true);
         try {
-            const response = await fetch(`${baseUrl}/v1/patients/${patientId}`, {
+            const response = await fetch(apiUrl(`/v1/patients/${patientId}`), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: freeComment })
@@ -223,7 +222,7 @@ export default function FetalMonitor() {
         } finally {
             setIsSaving(false);
         }
-    }, [patientId, freeComment, isSaving, baseUrl]);
+    }, [patientId, freeComment, isSaving]);
 
     const dynamicAnnotations = useMemo(() => {
         if (!selectedExaminationDetails?.intervals) return [];
@@ -306,7 +305,7 @@ export default function FetalMonitor() {
     if (patientFetchError) {
         return (
             <div className="loading-screen">
-                <p style={{ color: 'red' }}>{patientFetchError}</p>
+                <p className="error-state-text">{patientFetchError}</p>
             </div>
         );
     }
@@ -425,10 +424,10 @@ export default function FetalMonitor() {
         if (!metadata) return <p>Метаданные отсутствуют.</p>;
 
         return (
-            <div style={{ fontSize: '0.9em' }}>
+            <div className="metadata-list">
                 {Object.entries(metadata).map(([key, value]) => (
-                    <p key={key} style={{ margin: '4px 0', borderBottom: '1px dotted #ccc' }}>
-                        <strong style={{ textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}:</strong> {value !== null && value !== undefined ? String(value) : 'N/A'}
+                    <p key={key}>
+                        <strong>{key.replace(/_/g, ' ')}:</strong> {value !== null && value !== undefined ? String(value) : 'N/A'}
                     </p>
                 ))}
             </div>
@@ -439,9 +438,16 @@ export default function FetalMonitor() {
     return (
         <div className="fetal-monitor-container" ref={containerRef}>
             <header className="fm-header bento-box bento-header">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <h1 className="fm-title">Кардиотокография (КТГ)</h1>
-                    {patientData?.ongoing_examination_id && <button  onClick={handleConnect} style={{padding: '15px', borderRadius: '8px', marginLeft: '20px', backgroundColor: 'rgb(0, 123, 255)', color: 'white', border: 'none', cursor: 'pointer'}}>Подключиться к транслиции</button>}
+                <div className="fm-header-row">
+                    <div>
+                        <h1 className="fm-title">Кардиотокография</h1>
+                        <p className="fm-header-caption">Карта пациента, архив записей и клиническое заключение</p>
+                    </div>
+                    {patientData?.ongoing_examination_id && (
+                        <button onClick={handleConnect} className="fm-action-button">
+                            Подключиться к трансляции
+                        </button>
+                    )}
                 </div>
                 <div className="fm-info-time">{new Date().toLocaleString()}</div>
             </header>
@@ -492,12 +498,11 @@ export default function FetalMonitor() {
                     />
                 </div>
 
-                <div className="bento-box fm-result" style={{marginTop: '-16px', marginBottom: '20px'}}>
-                    <div style={{padding: '10px', borderRadius: '5px'}}>
-
+                <div className="bento-box fm-result">
+                    <div className="recommendation-panel">
                         <h3 className="fm-subtitle">РЕКОМЕНДАЦИИ:</h3>
                         {currentReportData?.recommendations && currentReportData?.recommendations?.length > 0 ? (
-                            <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
+                            <ul className="clinical-list">
                                 {currentReportData?.recommendations?.map((item, index) => (
                                     <li key={`rec-${index}`}>{item}</li>
                                 ))}
@@ -507,12 +512,10 @@ export default function FetalMonitor() {
                         )}
 
                         <br/>
-                        {/* --- ЗОНЫ РИСКА --- */}
                         <h3 className="fm-subtitle">ЗОНЫ РИСКА:</h3>
                         {currentReportData?.risk_zones && currentReportData?.risk_zones?.length > 0 ? (
-                            <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
+                            <ul className="clinical-list">
                                 {currentReportData?.risk_zones.map((item, index) => (
-                                    // Если это одна большая строка, лучше отобразить как P
                                     <li key={`risk-${index}`}>{item}</li>
                                 ))}
                             </ul>
@@ -521,10 +524,9 @@ export default function FetalMonitor() {
                         )}
 
                         <br/>
-                        {/* --- ЧТО В НОРМЕ --- */}
                         <h3 className="fm-subtitle">ЧТО В НОРМЕ:</h3>
                         {currentReportData?.what_in_norm && currentReportData?.what_in_norm?.length > 0 ? (
-                            <ul style={{listStyleType: 'disc', marginLeft: '20px'}}>
+                            <ul className="clinical-list">
                                 {currentReportData?.what_in_norm?.map((item, index) => (
                                     <li key={`norm-${index}`}>{item}</li>
                                 ))}
@@ -536,11 +538,8 @@ export default function FetalMonitor() {
                     </div>
                 </div>
                 <div className='bento-box fm-comment'>
-                    <div style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                    }}>
-                        <h4 style={{margin: '0 0 10px 0', color: '#333'}}>Комментарий врача</h4>
+                    <div className="comment-panel">
+                        <h4>Комментарий врача</h4>
 
                         <textarea
                             value={isCommentLoading ? 'Загрузка...' : freeComment}
@@ -548,33 +547,13 @@ export default function FetalMonitor() {
                             disabled={isCommentLoading || isSaving}
                             rows={6}
                             placeholder="Введите здесь свой комментарий..."
-                            style={{
-                            color: 'black',
-                            overflowY: 'auto',
-                            width: '100%',
-                            padding: '8px',
-                            borderRadius: '5px',
-                            border: '1px solid #ccc',
-                            fontSize: '14px',
-                            resize: 'none',
-                            backgroundColor: 'white',
-                        }}
+                            className="doctor-comment-textarea"
                             />
 
                         <button
                             onClick={handleSaveComment}
                             disabled={isCommentLoading}
-                            style={{
-                                float: 'left',
-                                marginTop: '10px',
-                                padding: '8px 15px',
-                                borderRadius: '5px',
-                                border: 'none',
-                                backgroundColor: isCommentLoading ? '#ccc' : '#007bff',
-                                color: 'white',
-                                cursor: isCommentLoading ? 'not-allowed' : 'pointer',
-                                transition: 'background-color 0.2s'
-                            }}
+                            className="fm-action-button comment-save-button"
                         >
                             {isSaving ? 'Сохранение...' : 'Сохранить комментарий'}
                         </button>
@@ -595,8 +574,8 @@ export default function FetalMonitor() {
                         </p>
                     )}
 
-                    <hr style={{margin: '15px 0'}}/>
-                    <h2 className="fm-subtitle" style={{marginBottom: '10px'}}>Детали выбранной записи</h2>
+                    <hr className="section-divider"/>
+                    <h2 className="fm-subtitle">Детали выбранной записи</h2>
                     {selectedExaminationDetails ? (
                         <>
                             <p><strong>ID исследования:</strong> {selectedExaminationDetails.id}</p>

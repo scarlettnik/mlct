@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import '../Modal.css';
 import '../Param.css'
 
@@ -25,28 +25,20 @@ const ParamModal = ({ isOpen, onClose, analysisStats }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" style={{overflow: 'hidden !important'}} onClick={onClose}>
+        <div className="modal-overlay" onClick={onClose}>
             <div
-                className="modal-content"
-                style={{
-                    width: '50vw',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '20px',
-                    fontSize: '18px',
-                }}
+                className="modal-content param-modal-content"
                 onClick={e => e.stopPropagation()}
             >
-                <header className="modal-header" style={{padding: '20px', flexShrink: 0}}>
+                <header className="modal-header">
                     <h3 className="modal-title">Анализ мониторинга</h3>
                     <button className="close-button" onClick={onClose}>&times;</button>
                 </header>
-                <div>
+                <div className="param-report-body">
                     <div>
-                        <header style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <header className="param-report-header">
                             <h2 className="fm-subtitle">Отчет</h2>
                         </header>
-                        {/* Вывод метрик с использованием reportData */}
                         <div className="report-metric">
                             Среднее значение базовой ЧСС:
                             <span className="metric-value">{reportData.avgBaselineFHR} уд</span>

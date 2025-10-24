@@ -12,10 +12,10 @@ export default function HRTSettingsModal({
                                              isOpen,
                                              onClose,
                                              currentHRT = 0,
-                                             onSave, // Функция для передачи сохраненных данных в FetalMonitor
+                                             onSave,
                                              initialMinHRT = initialDefaultSettings.minHRT,
                                              initialMaxHRT = initialDefaultSettings.maxHRT,
-                                             initialVolume = initialDefaultSettings.volume, // 📌 Принимаем громкость
+                                             initialVolume = initialDefaultSettings.volume,
                                          }) {
     const [settings, setSettings] = useState(() => ({
         minHRT: initialMinHRT,
@@ -102,7 +102,7 @@ export default function HRTSettingsModal({
         e.preventDefault();
 
         if (settings.minHRT >= settings.maxHRT) {
-            setMessage("❌ Минимальное ЧСС должно быть строго меньше Максимального.");
+            setMessage("Минимальное ЧСС должно быть строго меньше максимального.");
             return;
         }
 
@@ -125,12 +125,11 @@ export default function HRTSettingsModal({
                 <h2 className="modal-title">Настройки Тревоги (ЧСС и Звук)</h2>
                 <button className="close-button" onClick={onClose}>&times;</button>
 
-                {/*/!* Отображение текущего ЧСС *!/*/}
-                {/*<div className="current-hrt-display">*/}
-                {/*    Текущая ЧСС: <span className={isAlertCondition ? 'alert-value' : 'normal-value'}>*/}
-                {/*        {currentHRT} уд/мин*/}
-                {/*    </span>*/}
-                {/*</div>*/}
+                <div className="current-hrt-display">
+                    Текущая ЧСС: <span className={isAlertCondition ? 'alert-value' : 'normal-value'}>
+                        {currentHRT} уд/мин
+                    </span>
+                </div>
 
                 {message && <p className="alert-message">{message}</p>}
 

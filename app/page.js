@@ -3,57 +3,62 @@ import styles from './start/styles.module.css';
 
 const features = [
     {
-        title: "ДЕМОНСТРАЦИЯ ПУЛЬСА",
-        description: "Визуализация сердцебиения плода в реальном времени.",
+        title: "Мониторинг КТГ",
+        description: "Поток ЧСС плода и маточной активности с выделением подозрительных интервалов.",
         className: `${styles.size2x2} ${styles.bentoBlock} ${styles.demoBlock}`,
+        icon: "CTG"
     },
     {
-        title: "НАЧАТЬ СИМУЛЯЦИЮ (КТГ)",
+        title: "Начать симуляцию",
+        description: "Загрузить запись и перейти к мониторингу.",
         className: `${styles.size2x2} ${styles.buttonCard}`,
         href: "/mon",
         isPrimary: true,
+        icon: "01"
     },
     {
-        title: "ПОСМОТРЕТЬ АНАЛИЗ КЕЙСОВ",
+        title: "Анализ кейсов",
+        description: "Открыть список пациентов и завершенные исследования.",
         className: `${styles.size2x2} ${styles.buttonCard}`,
         href: "/list",
         isSecondary: true,
+        icon: "02"
     },
     {
-        title: "ЭКСПЕРТНАЯ ВАЛИДАЦИЯ",
-        description: "Консультировались с практикующими акушерами-гинекологами.",
+        title: "Клинический контекст",
+        description: "Карточка пациента, анамнез, показатели газа крови и комментарий врача рядом с графиками.",
         className: `${styles.size2x1} ${styles.bentoBlock}`,
-        icon: "🩺"
+        icon: "HX"
     },
     {
-        title: "УДАЛЕННЫЙ ДОСТУП",
-        description: "Облачный мониторинг. Врач может подключиться из кабинета",
+        title: "Удаленный доступ",
+        description: "Подключение к активной трансляции исследования без потери текущего состояния.",
         className: `${styles.size2x1} ${styles.bentoBlock}`,
-        icon: "☁️"
+        icon: "WS"
     },
     {
-        title: "ПРЕДСКАЗАНИЕ РИСКОВ",
-        description: "Краткосрочные и долгосрочные прогнозы исходов на основе анализа паттернов КТГ.",
+        title: "Риски",
+        description: "Система показывает зоны внимания и прогноз по мере поступления данных.",
         className: `${styles.size1x1} ${styles.bentoBlock}`,
-        icon: "🔮"
+        icon: "R"
     },
     {
-        title: "АВТОМАТИЧЕСКАЯ АНАЛИТИКА",
-        description: "Мгновенный отчет о времени реакции, точности диагноза и клинической эффективности.",
+        title: "Отчет",
+        description: "Средние значения, акцелерации, децелерации и статус исследования в одном блоке.",
         className: `${styles.size1x1} ${styles.bentoBlock}`,
-        icon: "📊"
+        icon: "PDF"
     },
     {
-        title: "ДОПОЛНИТЕЛЬНЫЕ ИСТОЧНИИКИ",
-        description: "Повысили точность предсказаний с помощью использования дополнительных данных",
+        title: "Данные",
+        description: "Загрузка ZIP-архива и быстрый выбор пациента для симуляции.",
         className: `${styles.size1x1} ${styles.bentoBlock}`,
-        icon: "📑"
+        icon: "ZIP"
     },
     {
-        title: "ФОКУС НА АНОМАЛИЯХ",
-        description: "Система выделяет подозрительные сегменты КТГ для акцентированного внимания.",
+        title: "Фокус",
+        description: "Выделенные сегменты на графиках раскрывают описание по клику.",
         className: `${styles.size1x1} ${styles.bentoBlock}`,
-        icon: "🔍"
+        icon: "AI"
     },
 ];
 
@@ -68,7 +73,6 @@ const FeatureCard = ({ title, description, className, icon, href, isPrimary, isS
         );
     }
 
-    // Рендеринг кнопок
     if (href) {
         const buttonClass = isPrimary ? styles.primaryButton : styles.secondaryButton;
 
@@ -81,7 +85,6 @@ const FeatureCard = ({ title, description, className, icon, href, isPrimary, isS
         );
     }
 
-    // Рендеринг обычных информационных блоков
     return (
         <div className={className}>
             <div className={styles.icon}>{icon}</div>
@@ -97,10 +100,10 @@ const FetalMonitorShowcase = () => {
 
             <header className={styles.header}>
                 <h1 className={styles.title}>
-                    КТГ-СИМУЛЯТОР: ПРАКТИКА ИНТЕРПРЕТАЦИИ
+                    КТГ рабочая станция
                 </h1>
                 <p className={styles.subtitle}>
-                    Симулятор, основанный на протоколах FIGO/NICE.
+                    Симуляция, мониторинг и разбор клинических кейсов в одном интерфейсе.
                 </p>
             </header>
             <div className={styles.bentoGrid}>

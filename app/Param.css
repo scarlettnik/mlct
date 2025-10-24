@@ -1,151 +1,118 @@
-.modal-header {
+.param-modal-content {
+    width: min(720px, 100%);
+}
+
+.param-report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.param-report-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    border-bottom: 1px solid #e0e0e0;
-    background-color: #f7f9fc;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    flex-shrink: 0;
+    margin-bottom: 8px;
 }
 
-.modal-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
+.param-report-body .fm-subtitle {
     margin: 0;
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-.close-button {
-    background: none;
-    border: none;
-    font-size: 30px;
-    cursor: pointer;
-    color: #999;
-    transition: color 0.2s;
-}
-
-.close-button:hover {
-    color: #555;
-    transform: rotate(3deg);
-}
-
-.fm-subtitle {
-    font-size: 20px;
-    font-weight: 500;
-    color: #007bff;
-    margin: 20px 0 15px;
-    padding: 0 30px;
-}
-
-/* Контейнер для всех метрик */
 .report-container {
-    padding: 0 30px 30px;
+    padding: 0;
     overflow-y: auto;
 }
 
-/* Общий стиль для каждой основной метрики */
 .report-metric {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 12px 30px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 16px;
-    color: #444;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.96rem;
+    line-height: 1.4;
 }
 
-.report-metric:last-of-type {
-    border-bottom: none;
-}
-
-/* Выделение значений метрик */
-.metric-value {
-    font-weight: 700;
-    color: #000000;
-    min-width: 60px; /* Фиксированная минимальная ширина для выравнивания */
-    text-align: right;
-    margin-left: 10px;
-}
-
-/* ==================================== */
-/* 4. СТИЛИ ДЛЯ ВЛОЖЕННЫХ МЕТРИК */
-/* ==================================== */
-
-/* Подметрики (Децелерации) */
 .report-submetric {
     display: flex;
     justify-content: space-between;
-    padding: 8px 30px 8px 50px; /* Сдвиг вправо для иерархии */
-    font-size: 15px;
-    color: #666;
-    background-color: #fafafa;
-    border-bottom: 1px dashed #eee;
+    gap: 14px;
+    padding: 9px 0 9px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.94rem;
+    line-height: 1.4;
 }
 
-.report-submetric .metric-value {
-    font-weight: 600;
-    color: #333;
+.metric-value {
+    min-width: 70px;
+    color: var(--text-strong);
+    font-weight: 800;
+    text-align: right;
 }
 
-/* Стили для метрик времени (Тахикардия/Брадикадия) */
 .time-metric {
-    flex-direction: column; /* Метки времени идут в столбик */
-    align-items: flex-start;
-    padding-bottom: 0;
+    flex-direction: column;
 }
 
 .time-submetric {
+    width: 100%;
     display: flex;
     justify-content: space-between;
-    width: 100%;
-    padding: 5px 0;
-    font-size: 15px;
-    color: #555;
-    padding-left: 30px; /* Отступ для субметрик */
+    gap: 14px;
+    color: var(--text-muted);
 }
-
-.time-submetric:last-child {
-    padding-bottom: 12px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-/* ==================================== */
-/* 5. СТАТУС ПАТОЛОГИИ (ЦВЕТОВОЕ ВЫДЕЛЕНИЕ) */
-/* ==================================== */
 
 .report-pathology-status {
-    padding: 15px 30px;
-    margin-top: 15px;
+    margin: 10px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 2px solid #ddd;
-    border-bottom: 2px solid #ddd;
-    font-size: 20px;
-    font-weight: 700;
+    gap: 12px;
+    background: var(--surface-soft);
+    font-weight: 800;
 }
 
 .pathology-label {
-    color: #333;
+    color: var(--text-strong);
 }
 
 .pathology-value {
-    padding: 5px 15px;
-    border-radius: 8px;
-    color: black;
-    font-weight: 700;
+    color: var(--text-strong);
+    font-weight: 800;
 }
 
 .pathology-value.normal {
-    background-color: #28a745;
+    color: var(--success);
 }
 
 .pathology-value.suspicious {
-    background-color: #ffc107;
+    color: var(--warning);
 }
 
 .pathology-value.pathological {
-    background-color: #dc3545; /* Красный */
+    color: var(--danger);
+}
+
+@media (max-width: 640px) {
+    .report-metric,
+    .report-submetric,
+    .time-submetric,
+    .report-pathology-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .metric-value {
+        text-align: left;
+    }
 }

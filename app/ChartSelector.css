@@ -1,132 +1,104 @@
-.chart-selector-title {
-    margin-top: 0;
-}
-
-.chart-selector-data-info {
-    margin-bottom: 15px;
-    font-size: 0.9em;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.chart-selector-data-info p {
-    margin: 5px 0;
-}
-
-.chart-selector-data-info .stat-note {
-    font-style: italic;
-    color: #666;
-    margin-top: 8px;
-}
-
-.chart-selector-groups-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
 .chart-selector-container {
     width: 100%;
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
+    gap: 14px;
+}
+
+.chart-selector-title {
+    margin: 0;
 }
 
 .chart-selector-scrollable-content {
-    max-height: 75vh;
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 4px;
 }
 
 .chart-selector-scrollable-content::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
+
 .chart-selector-scrollable-content::-webkit-scrollbar-thumb {
-    background-color: #d0d0d0;
-    border-radius: 3px;
+    border-radius: 999px;
+    background-color: #9db2b0;
 }
+
+.chart-selector-groups-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
 .chart-selector-group-item {
-    margin-bottom: 15px;
-    padding-bottom: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.chart-selector-group-item:first-child {
+    padding-top: 0;
 }
 
 .chart-selector-group-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    border-bottom: 0;
 }
 
 .group-date-title {
-    margin: 0 0 10px 0;
-    font-size: 1.1em;
-    color: #333;
-}
-
-.chart-selector-buttons-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-left: 20px;
-}
-
-.chart-selector-button {
-    padding: 8px 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: white;
-    font-weight: normal;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    text-align: left;
-}
-
-.chart-selector-button.active {
-    border: 1px solid lime;
-    background-color: rgba(50, 205, 50, 0.2);
-    font-weight: bold;
-}
-
-.selected-icon {
-    margin-left: 8px;
+    margin: 0 0 10px;
+    color: var(--text-strong);
+    font-size: 0.96rem;
+    font-weight: 800;
 }
 
 .record-sublist {
-    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.record-list-item.active {
-    border: 1px solid lime;
-    background-color: rgba(50, 205, 50, 0.2);
-    font-weight: bold;
-}
-
-.record-list-item.active::before {
-    background-color: lime; /* Заливка кружочка зеленым */
-    border-color: lime; /* Зеленый ободок */
+.record-list-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .record-part {
+    min-height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #ffffff;
+    color: var(--text);
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 4px;
-    margin-right: 8px; /* Отступ между частями */
-    margin-bottom: 5px; /* Отступ между строками, если переносится */
+    display: inline-flex;
     align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .record-part:hover {
-    background-color: #f0f0f0;
+    border-color: rgba(19, 115, 111, 0.26);
+    background: rgba(232, 246, 244, 0.75);
+    color: var(--accent);
 }
 
 .record-part.active-green {
-    background-color: #e6ffe6; /* Светло-зелёный фон */
-    border-color: #4CAF50; /* Зелёная граница */
-    color: #1a4d1a; /* Тёмно-зелёный текст для контраста */
-    font-weight: bold;
+    border-color: rgba(25, 135, 84, 0.38);
+    background: rgba(25, 135, 84, 0.12);
+    color: var(--success);
 }
 
-.record-part.active-green:hover {
-    background-color: #d9f9d9; /* Чуть темнее зелёный при наведении */
+.record-text {
+    color: inherit;
+}
+
+.no-data-placeholder {
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+    padding: 18px;
+    color: var(--text-muted);
+    background: var(--surface-soft);
+    line-height: 1.5;
 }

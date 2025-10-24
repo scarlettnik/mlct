@@ -14,11 +14,10 @@ const PatientInfo = ({patient, onDataUpdate}) => {
     }
     return (<>
         <aside className="bento-box fm-patient-info">
-            <header className="fm-patient-header" style={{display: 'flex', justifyContent: 'space-between'}}>
+            <header className="fm-patient-header">
                 <h2 className="fm-subtitle">Пациент</h2>
                 <button
                     className="edit-button"
-                    style={{backgroundColor: '#007bff',padding: '8px 15px', borderRadius: '8px'}}
                     onClick={() => setIsModalOpen(true)}
                 >
                     Редактировать
@@ -27,17 +26,13 @@ const PatientInfo = ({patient, onDataUpdate}) => {
 
             <p className="fm-patient-name">{patient?.name || `Фамилия Имя Отчество ${patient?.id}`}</p>
             <div className="fm-details-group">
-                <div className="fm-patient-detail"><p style={{width: '35%'}}>Паритет родов:</p> <span
-                    style={{width: '60%'}}>{patient?.info?.parity || 'Нет данных'}</span></div>
-                <div className="fm-patient-detail"><p style={{width: '35%'}}>Соматические
-                    заболевания: </p><span
-                    style={{width: '60%'}}>{patient?.info?.somatic_diseases || 'Нет данных'}</span>
+                <div className="fm-patient-detail"><p>Паритет родов:</p> <span>{patient?.info?.parity || 'Нет данных'}</span></div>
+                <div className="fm-patient-detail"><p>Соматические
+                    заболевания: </p><span>{patient?.info?.somatic_diseases || 'Нет данных'}</span>
                 </div>
-                <div className="fm-patient-detail"><p style={{width: '35%'}}>Течение беременности: </p><span
-                    style={{width: '60%'}}>{patient?.info?.pregnancy_course || 'Нет данных'}</span>
+                <div className="fm-patient-detail"><p>Течение беременности: </p><span>{patient?.info?.pregnancy_course || 'Нет данных'}</span>
                 </div>
-                <div className="fm-patient-detail"><p style={{width: '35%'}}>Последняя менструация: </p> <span
-                    style={{width: '60%'}}>{patient?.info?.last_menstrual_period || 'Нет данных'}</span></div>
+                <div className="fm-patient-detail"><p>Последняя менструация: </p> <span>{patient?.info?.last_menstrual_period || 'Нет данных'}</span></div>
             </div>
 
             <div className="fm-bga-section">

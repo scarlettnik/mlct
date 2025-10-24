@@ -1,6 +1,20 @@
 :root {
-  --background: #ffffff;
-  --foreground: #ffffff;
+  --background: #f4f8f7;
+  --surface: #ffffff;
+  --surface-soft: #f7fbfa;
+  --text-strong: #17212b;
+  --text: #263746;
+  --text-muted: #687887;
+  --border: #dfe8e7;
+  --border-strong: #b9c8c7;
+  --accent: #13736f;
+  --accent-strong: #0f5f5e;
+  --accent-blue: #27687b;
+  --success: #198754;
+  --warning: #d89417;
+  --danger: #c24132;
+  --shadow-sm: 0 8px 24px rgba(18, 44, 52, 0.08);
+  --shadow-md: 0 18px 46px rgba(18, 44, 52, 0.12);
 }
 
 html,
@@ -10,9 +24,11 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: #f0f4f8;
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    linear-gradient(180deg, #f6faf9 0%, #eef6f4 48%, #f8fbfa 100%);
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,13 +44,23 @@ a {
   text-decoration: none;
 }
 
-textarea {
-  background-color: white !important;
-  transition: background-color 0.3s;
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+button {
+  color: inherit;
+}
+
+input,
+textarea {
+  background-color: #ffffff;
+  color: var(--text-strong);
+}
+
+textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }

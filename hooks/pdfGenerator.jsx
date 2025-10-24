@@ -9,7 +9,7 @@ export const generatePdfFromHtml = async (elementRef, fileNamePrefix = 'Report')
 
     try {
         const canvas = await html2canvas(elementRef, {
-            scale: 2, // Увеличение масштаба для лучшего качества
+            scale: 2,
             useCORS: true,
             allowTaint: true,
         });

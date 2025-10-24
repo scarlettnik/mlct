@@ -5,7 +5,6 @@ import '../panel/[id]/style.css'
 const ReportBlock = ({ reportData }) => {
     const stats = reportData?.stats;
 
-    // Классы для состояния
     let pathologyClass = 'path-normal';
     if (stats?.condition === 'Suspicious') {
         pathologyClass = 'path-suspicious';
@@ -22,22 +21,13 @@ const ReportBlock = ({ reportData }) => {
     return (
         <div
             className={'bento-box fm-report-block fm-patient-info'}
-            style={{ minWidth: '30vw !important' }}
             ref={reportRef}
         >
-            <header style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <header className="report-header">
                 <h2 className="fm-subtitle">Отчет</h2>
                 <button
                     onClick={generatePdfReport}
                     className="fm-print-button"
-                    style={{
-                        padding: '8px 15px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
-                    }}
                 >
                     Скачать отчет
                 </button>
@@ -80,7 +70,7 @@ const ReportBlock = ({ reportData }) => {
 
             <div className="report-metric time-metric">
                 Тахикардия:
-                <div className="time-submetric" style={{ paddingLeft: '1ch' }}>
+                <div className="time-submetric">
                     умеренная: <span className="metric-value">
                         {stats?.mild_tachycardia_seconds
                             ? (stats.mild_tachycardia_seconds / 60).toFixed(1)

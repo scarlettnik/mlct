@@ -1,180 +1,335 @@
-.modal-backdrop {
+.modal-backdrop,
+.modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    inset: 0;
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.42);
     overflow-y: auto;
 }
 
-
 .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
+    width: min(680px, 100%);
+    max-height: min(92vh, 920px);
     overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text);
+    box-shadow: var(--shadow-md);
+    padding: 22px;
+}
+
+.patient-info-modal {
+    width: min(820px, 100%);
 }
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
 }
 
 .modal-title {
     margin: 0;
-    font-size: 1.5em;
-    color: #333;
+    color: var(--text-strong);
+    font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+    line-height: 1.2;
+    font-weight: 800;
 }
 
 .close-button {
-    background: none;
-    border: none;
-    font-size: 1.5em;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text-muted);
     cursor: pointer;
-    color: #999;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    line-height: 1;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.close-button:hover {
+    border-color: rgba(194, 65, 50, 0.22);
+    background: #fff5f3;
+    color: var(--danger);
+}
+
+.patient-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
 .patient-edit-form fieldset {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--surface-soft);
 }
 
 .patient-edit-form legend {
-    font-weight: bold;
-    color: #007bff;
-    padding: 0 10px;
+    padding: 0 8px;
+    color: var(--accent);
+    font-weight: 800;
 }
 
 .patient-edit-form label {
     display: block;
-    margin-top: 10px;
-    font-weight: 500;
-    color: #555;
+    color: var(--text-strong);
+    font-size: 0.92rem;
+    font-weight: 750;
 }
 
 .patient-edit-form input[type="text"],
-.patient-edit-form textarea {
+.patient-edit-form input[type="date"],
+.patient-edit-form input[type="number"],
+.patient-edit-form textarea,
+.compact-input {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    background-color: #ffffff;
-    color: black;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #ffffff;
+    color: var(--text-strong);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.patient-edit-form input:focus,
+.patient-edit-form textarea:focus,
+.compact-input:focus {
+    outline: none;
+    border-color: rgba(19, 115, 111, 0.45);
+    box-shadow: 0 0 0 4px rgba(19, 115, 111, 0.09);
 }
 
 .patient-edit-form textarea {
+    min-height: 100px;
+    margin-top: 8px;
     resize: vertical;
 }
 
+.form-row {
+    display: grid;
+    grid-template-columns: minmax(160px, 1fr) minmax(180px, 1.1fr);
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+}
+
+.bga-grid {
+    display: grid;
+    gap: 4px;
+}
 
 .bga-label {
-    margin-top: 0;
-    align-self: center;
-    font-weight: normal;
+    margin: 0;
 }
 
 .bga-input {
-    margin-top: 0 !important;
+    margin: 0;
 }
 
-/* Кнопки действий */
-.modal-actions {
+.modal-actions,
+.button-group {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
-    padding-top: 10px;
 }
 
-.save-btn, .cancel-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+.save-btn,
+.cancel-btn,
+.btn-submit,
+.btn-cancel {
+    min-height: 40px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 9px 15px;
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    font-size: 0.92rem;
+    font-weight: 800;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
-.save-btn {
-    background-color: #007bff;
-    color: white;
+.save-btn,
+.btn-submit {
+    background: var(--accent);
+    color: #ffffff;
 }
 
-.save-btn:hover {
-    background-color: #0056b3;
+.save-btn:hover,
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: var(--accent-strong);
 }
 
-.cancel-btn {
-    background-color: #f0f0f0;
-    color: #333;
+.cancel-btn,
+.btn-cancel {
+    border-color: var(--border);
+    background: #ffffff;
+    color: var(--text);
 }
 
-.cancel-btn:hover {
-    background-color: #ddd;
-}
-
-/* Дополнительные стили для PatientInfo */
-.fm-patient-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.cancel-btn:hover,
+.btn-cancel:hover:not(:disabled) {
+    background: var(--surface-soft);
 }
 
 .edit-button {
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 5px;
+    min-height: 40px;
+    border: 1px solid rgba(19, 95, 94, 0.18);
+    border-radius: 8px;
+    padding: 9px 14px;
+    background: var(--accent);
+    color: #ffffff;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.9rem;
+    font-weight: 800;
 }
 
-/* ================================================= */
-/* СТИЛИЗАЦИЯ СКРОЛЛБАРА (Прокрутки)        */
-/* ================================================= */
-
-/* Для Firefox */
-.modal-backdrop, .modal-content {
-    scrollbar-width: thin; /* Тонкий скроллбар */
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Цвет ползунка и фона */
+.patient-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
-/* Для Chrome, Edge и Safari */
+.modal-patient-name {
+    margin: 0;
+    color: var(--accent);
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.modal-details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--surface-soft);
+}
+
+.modal-patient-detail {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.6fr) minmax(0, 1fr);
+    gap: 12px;
+    line-height: 1.45;
+}
+
+.modal-patient-detail p {
+    margin: 0;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.modal-patient-detail span {
+    color: var(--text-strong);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.modal-section-title {
+    margin: 0 0 10px;
+    color: var(--text-strong);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.modal-bga-section {
+    overflow-x: auto;
+}
+
+.modal-bga-table {
+    width: 100%;
+    min-width: 460px;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.modal-bga-table th,
+.modal-bga-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.modal-bga-table th {
+    color: var(--text-strong);
+    background: #edf6f5;
+    font-weight: 800;
+}
+
+.modal-bga-table td {
+    color: var(--text);
+}
+
+.empty-table-cell,
+.modal-loading {
+    padding: 28px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.modal-backdrop,
+.modal-overlay,
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #9db2b0 transparent;
+}
+
 .modal-backdrop::-webkit-scrollbar,
+.modal-overlay::-webkit-scrollbar,
 .modal-content::-webkit-scrollbar {
-    width: 8px; /* Общая ширина скроллбара (тоньше, чем стандартные 12-17px) */
+    width: 8px;
 }
 
-/* Цвет и форма ползунка */
 .modal-backdrop::-webkit-scrollbar-thumb,
+.modal-overlay::-webkit-scrollbar-thumb,
 .modal-content::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2); /* Светло-серый/полупрозрачный цвет */
-    border-radius: 4px; /* Закругленные края */
-    border: 2px solid transparent; /* Уменьшаем видимую область ползунка */
+    border-radius: 999px;
+    background: #9db2b0;
 }
 
-/* Фон скроллбара (полоса, по которой движется ползунок) */
-.modal-backdrop::-webkit-scrollbar-track,
-.modal-content::-webkit-scrollbar-track {
-    background: transparent; /* Делаем фон полностью прозрачным */
-}
+@media (max-width: 680px) {
+    .modal-backdrop,
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 12px;
+    }
 
-/* Изменение стиля при наведении на ползунок */
-.modal-backdrop::-webkit-scrollbar-thumb:hover,
-.modal-content::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.4);
+    .modal-content {
+        padding: 18px;
+    }
+
+    .form-row,
+    .modal-patient-detail {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-actions,
+    .button-group {
+        flex-direction: column-reverse;
+    }
+
+    .save-btn,
+    .cancel-btn,
+    .btn-submit,
+    .btn-cancel {
+        width: 100%;
+    }
 }

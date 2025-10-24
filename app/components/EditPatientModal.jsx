@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import '../Modal.css';
 import { useParams } from "next/navigation";
+import { apiUrl } from "@/app/lib/api";
 
 const FIXED_BGA_PARAMS = [
     { parameter: "pH", apiName: "pH", unit: "" },
@@ -108,25 +109,18 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
             return;
         }
 
-        console.log(formData)
-
         if (!formData.info.last_menstrual_period.trim()) {
             alert("Пожалуйста, выберите дату последней менструации.");
             return;
         }
-        // --- КОНЕЦ ЛОГИКИ ВАЛИДАЦИИ ---
-
         const apiData = formatDataForApi(formData);
 
         const isUpdate = !!params?.id;
         const method = isUpdate ? 'PATCH' : 'POST';
 
-        // Рекомендуется использовать переменную среды для BASE_API_URL
-        const BASE_API_URL = 'https://hack.nearby-project.ru/v1';
-
         const url = isUpdate
-            ? `${BASE_API_URL}/patients/${params?.id}`
-            : `${BASE_API_URL}/patients`;
+            ? apiUrl(`/v1/patients/${params?.id}`)
+            : apiUrl("/v1/patients");
 
         try {
             const response = await fetch(url, {
@@ -170,30 +164,18 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
                         <label>Имя пациента:</label>
                         <input type="text" name="name" value={formData?.name || ''} onChange={handleChange} required/>
 
-                        <div style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0'}}>
+                        <div className="form-row">
                             <label>Паритет родов:</label>
-                            <input type="text" style={{
-                                backgroundColor: 'white',
-                                border: '1px solid black',
-                                padding: '5px',
-                                color: 'black',
-                                width: '150px'
-                            }} name="parity"
+                            <input type="text" className="compact-input" name="parity"
                                    value={formData?.info?.parity || ''}
                                    onChange={handleChange} required/>
                         </div>
 
-                        <div style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0'}}>
+                        <div className="form-row">
                             <label>Последняя менструация:</label>
-                            <input style={{
-                                backgroundColor: 'white',
-                                border: '1px solid black',
-                                padding: '5px',
-                                color: 'black',
-                                width: '150px'
-                            }} type="date" name="last_menstrual_period"
+                            <input className="compact-input" type="date" name="last_menstrual_period"
                                    value={formData?.info?.last_menstrual_period || ''}
-                                   onChange={handleChange} required/> {/* Добавлен атрибут required */}
+                                   onChange={handleChange} required/>
                         </div>
 
 
@@ -213,22 +195,15 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
                         <div className="bga-grid">
                             {formData?.info?.blood_gas.map((item, index) => (
                                 <React.Fragment key={item.parameter}>
-                                    <div style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0'}}>
+                                    <div className="form-row">
                                         <label className="bga-label">{item.parameter} ({item?.unit}):</label>
                                         <input
-                                            style={{
-                                                backgroundColor: 'white',
-                                                border: '1px solid black',
-                                                padding: '5px',
-                                                color: 'black',
-                                                width: '150px'
-                                            }}
+                                            className="bga-input compact-input"
                                             type="number"
                                             step="any"
                                             name={`bga_${index}_value`}
                                             value={item?.value}
                                             onChange={handleChange}
-                                            className="bga-input"
                                             min={0}
                                         />
                                     </div>

@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
 import "../ChartSelector.css";
+import { apiUrl } from "@/app/lib/api";
 
 const formatTimeMMSS = (sec) => {
     const s = Math.max(0, Math.round(sec));
@@ -80,9 +81,6 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
         };
     }, [data, loading]);
 
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL;
-
-
     const handleChartClick = useCallback(async (examinationId, partIndex, recordId) => {
         const selectedPart = { examinationId, partIndex, recordId };
         setSelected(selectedPart);
@@ -92,16 +90,14 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
 
         try {
             const resPart = await fetch(
-                `${baseUrl}/v1/patients/${patient.id}/examinations/${examinationId}/part/${partIndex}`
+                apiUrl(`/v1/patients/${patient.id}/examinations/${examinationId}/part/${partIndex}`)
             );
             jsonPart = await resPart.json();
-            console.log(`Данные части #${partIndex}:`, jsonPart);
 
             const resExam = await fetch(
-                `${baseUrl}/v1/patients/${patient.id}/examinations/${examinationId}`
+                apiUrl(`/v1/patients/${patient.id}/examinations/${examinationId}`)
             );
             jsonExam = await resExam.json();
-            console.log("Полное описание исследования:", jsonExam);
 
         } catch (err) {
             console.error("Ошибка при загрузке данных:", err);
@@ -117,7 +113,6 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
     useEffect(() => {
         if (!patient?.id || groupedCharts.length === 0) return;
 
-        // Автовыбор только если ничего еще не выбрано
         if (!selected) {
             const firstGroup = groupedCharts[0];
             const firstRecord = firstGroup.records[0];
@@ -128,11 +123,11 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
 
             handleChartClick(examinationId, partIndex, recordId);
         }
-    }, [patient?.id, groupedCharts]); // ❌ убрал selected и handleChartClick
+    }, [patient?.id, groupedCharts]);
 
 
     return (
-        <div className="bento-box chart-selector-container" style={{maxHeight:'80vh'}}>
+        <div className="bento-box chart-selector-container">
             <h2 className="fm-subtitle chart-selector-title">Выбор КТГ записи</h2>
 
             {groupedCharts.length === 0 ? (
