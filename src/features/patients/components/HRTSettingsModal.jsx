@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import VirtualKeyboard from "./VirtualKeyBoard";
-import "../UploadModal.css";
+import VirtualKeyboard from "@/shared/ui/VirtualKeyBoard";
+import "./UploadModal.css";
 
 const initialDefaultSettings = {
     minHRT: 60,

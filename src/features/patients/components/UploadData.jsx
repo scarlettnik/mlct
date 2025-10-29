@@ -2,9 +2,9 @@
 
 import React, {useState, useRef, useEffect, useId} from "react";
 import CreatableSelect from "react-select/creatable";
-import "../UploadModal.css";
-import VirtualKeyboard from "./VirtualKeyBoard";
-import { apiUrl } from "@/app/lib/api";
+import "./UploadModal.css";
+import VirtualKeyboard from "@/shared/ui/VirtualKeyBoard";
+import { apiUrl } from "@/shared/api/api";
 
 const fetchPatients = async () => {
     try {

@@ -1,8 +1,8 @@
 'use client'
 import React, {useCallback, useEffect, useState} from "react";
-import EditPatientModal from "@/app/components/EditPatientModal";
-import { apiUrl } from "@/app/lib/api";
-import "../Modal.css";
+import EditPatientModal from "@/features/patients/components/EditPatientModal";
+import { apiUrl } from "@/shared/api/api";
+import "@/shared/ui/Modal.css";
 
 const MonInfo = ({patientId, onClose, isOpen}) => {
     const [patient, setPatient] = useState(null);

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import './styles.css';
-import useUsers from "@/app/api/Patients";
+import useUsers from "@/features/patients/api/Patients";
 import React, {useState} from "react";
-import EditPatientModal from "@/app/components/EditPatientModal";
+import EditPatientModal from "@/features/patients/components/EditPatientModal";
 
 const ArrowRight = () => (
     <svg

@@ -1,6 +1,6 @@
 import React from "react";
-import { generatePdfFromHtml } from "@/hooks/pdfGenerator";
-import '../panel/[id]/style.css'
+import { generatePdfFromHtml } from "@/features/reports/lib/pdfGenerator";
+import "@/app/panel/[id]/style.css"
 
 const ReportBlock = ({ reportData }) => {
     const stats = reportData?.stats;

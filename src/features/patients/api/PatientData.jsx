@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiUrl } from "@/app/lib/api";
+import { apiUrl } from "@/shared/api/api";
 
 const useUsers = (url = apiUrl("/v1/patients")) => {
     const [users, setUsers] = useState([]);

@@ -13,11 +13,11 @@ import {
 import { Line } from "react-chartjs-2";
 import './style.css'
 import annotationPlugin from 'chartjs-plugin-annotation';
-import ReportBlock from "@/app/components/ReportBlock";
-import ChartSelector from "@/app/components/ChartSelector";
-import PatientInfo from "@/app/components/PatientInfo";
+import ReportBlock from "@/features/reports/components/ReportBlock";
+import ChartSelector from "@/features/charts/components/ChartSelector";
+import PatientInfo from "@/features/patients/components/PatientInfo";
 import { useParams, useRouter } from "next/navigation";
-import { apiUrl } from "@/app/lib/api";
+import { apiUrl } from "@/shared/api/api";
 
 ChartJS.register(
     CategoryScale,
@@ -35,29 +35,6 @@ const formatTimeMMSS = (sec) => {
     const ss = s % 60;
     return `${m.toString().padStart(2, "0")}:${ss.toString().padStart(2, "0")}`;
 };
-
-const ChartControl = ({ label, currentWidth, setWidth }) => {
-    const minWidth = 100;
-    const maxWidth = 400;
-
-    return (
-        <div className="chart-control-content">
-            <h2 className="fm-subtitle">{label}</h2>
-            <div className="zoom-slider-container">
-                <span className="zoom-label">Ширина графика ({currentWidth}%)</span>
-                <input
-                    type="range"
-                    min={minWidth}
-                    max={maxWidth}
-                    step="10"
-                    value={currentWidth}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    className="zoom-slider"
-                />
-            </div>
-        </div>
-    )
-}
 
 const transformChartData = (jsonArr) => {
     if (!Array.isArray(jsonArr)) return [];
@@ -253,7 +230,6 @@ export default function FetalMonitor() {
         );
 
     const [zoomRange, setZoomRange] = useState(null);
-    const [chartDisplayWidth, setChartDisplayWidth] = useState(100);
     const [selectedAnnotation, setSelectedAnnotation] = useState(null);
 
     const { sortedHR, sortedUC, xMin, xMax } = useMemo(() => {
@@ -456,16 +432,9 @@ export default function FetalMonitor() {
                 <PatientInfo patient={patientData} onDataUpdate={() => fetchPatientData(false)}/>
 
                 <ReportBlock reportData={selectedExaminationData?.exam}/>
-                <aside className="bento-box fm-chart-control-area">
-                    <ChartControl
-                        label="Управление масштабом"
-                        currentWidth={chartDisplayWidth}
-                        setWidth={setChartDisplayWidth}
-                    />
-                </aside>
 
                 <div className="bento-box fm-graph fm-graph-hr">
-                    <div className="chart-wrapper" style={{width: `${chartDisplayWidth}%`}}>
+                    <div className="chart-wrapper">
                         {chartPlaceholder ? chartPlaceholder : (
                             hasHRData ?
                                 <Line ref={hrChartRef} options={hrOptions} data={hrDataset}/> :
@@ -476,11 +445,11 @@ export default function FetalMonitor() {
                 </div>
 
                 <div className="bento-box fm-graph fm-graph-uc">
-                    <div className="chart-wrapper" style={{width: `${chartDisplayWidth}%`}}>
+                    <div className="chart-wrapper">
                         {chartPlaceholder ? chartPlaceholder : (
                             hasUCData ?
                                 <>
-                                    <p>Частота маточных сокращений</p>
+                                    <h2 className="fm-subtitle">Частота маточных сокращений</h2>
                                     <Line options={ucOptions} data={ucDataset}/></> :
                                 <p className="chart-status-text">Для просмотра графика выберите исследование, обработка
                                     может занять несколько секунд</p>

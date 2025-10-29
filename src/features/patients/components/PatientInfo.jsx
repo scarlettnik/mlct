@@ -1,7 +1,7 @@
 'use client'
 import React, {useState} from "react";
-import '../panel/[id]/style.css'
-import EditPatientModal from "@/app/components/EditPatientModal";
+import "@/app/panel/[id]/style.css"
+import EditPatientModal from "@/features/patients/components/EditPatientModal";
 
 const PatientInfo = ({patient, onDataUpdate}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);

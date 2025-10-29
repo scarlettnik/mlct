@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import '../Modal.css';
+import "@/shared/ui/Modal.css";
 import { useParams } from "next/navigation";
-import { apiUrl } from "@/app/lib/api";
+import { apiUrl } from "@/shared/api/api";
 
 const FIXED_BGA_PARAMS = [
     { parameter: "pH", apiName: "pH", unit: "" },

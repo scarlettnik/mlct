@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
-import "../ChartSelector.css";
-import { apiUrl } from "@/app/lib/api";
+import "./ChartSelector.css";
+import { apiUrl } from "@/shared/api/api";
 
 const formatTimeMMSS = (sec) => {
     const s = Math.max(0, Math.round(sec));

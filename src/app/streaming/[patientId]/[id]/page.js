@@ -12,12 +12,12 @@ import {
 import { Line } from "react-chartjs-2";
 import annotationPlugin from "chartjs-plugin-annotation";
 import "./style.css";
-import ParamModal from "@/app/components/ParamModal";
-import HRTSettingsModal from "@/app/components/HRTSettingsModal";
-import NextPartModal from "@/app/components/GoToNetx";
-import MonInfo from "@/app/components/MonInfo";
+import ParamModal from "@/features/charts/components/ParamModal";
+import HRTSettingsModal from "@/features/patients/components/HRTSettingsModal";
+import NextPartModal from "@/shared/ui/GoToNetx";
+import MonInfo from "@/features/monitoring/components/MonInfo";
 import {useParams} from "next/navigation";
-import { websocketUrl } from "@/app/lib/api";
+import { websocketUrl } from "@/shared/api/api";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, annotationPlugin);
 

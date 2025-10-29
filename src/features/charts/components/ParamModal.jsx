@@ -1,6 +1,6 @@
 import React from 'react';
-import '../Modal.css';
-import '../Param.css'
+import "@/shared/ui/Modal.css";
+import './Param.css'
 
 const ParamModal = ({ isOpen, onClose, analysisStats }) => {
     const secondsToMinutes = (seconds) => {
