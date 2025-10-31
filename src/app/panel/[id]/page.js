@@ -18,6 +18,7 @@ import ChartSelector from "@/features/charts/components/ChartSelector";
 import PatientInfo from "@/features/patients/components/PatientInfo";
 import { useParams, useRouter } from "next/navigation";
 import { apiUrl } from "@/shared/api/api";
+import { formatTimeMMSS } from "@/shared/lib/formatters";
 
 ChartJS.register(
     CategoryScale,
@@ -28,13 +29,6 @@ ChartJS.register(
     Tooltip,
     annotationPlugin
 );
-
-const formatTimeMMSS = (sec) => {
-    const s = Math.max(0, Math.round(sec));
-    const m = Math.floor(s / 60);
-    const ss = s % 60;
-    return `${m.toString().padStart(2, "0")}:${ss.toString().padStart(2, "0")}`;
-};
 
 const transformChartData = (jsonArr) => {
     if (!Array.isArray(jsonArr)) return [];

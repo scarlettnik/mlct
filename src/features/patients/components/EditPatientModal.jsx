@@ -38,12 +38,10 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
     useEffect(() => {
         if (!patientData) {
             setFormData({
-                misc_data: {
-                    name: '',
-                },
+                name: '',
                 info: {
                     parity: '',
-                    last_menstrual_period: null,
+                    last_menstrual_period: '',
                     somatic_diseases: '',
                     pregnancy_course: '',
                     blood_gas: FIXED_BGA_PARAMS.map(p => ({ ...p, name: p.apiName, value: '' }))
@@ -66,9 +64,7 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
         });
 
         setFormData({
-            misc_data: {
-                name: patientData?.name || '',
-            },
+            name: patientData?.name || '',
             info: {
                 parity: patientData?.info?.parity || '',
                 last_menstrual_period: patientData?.info?.last_menstrual_period || '',

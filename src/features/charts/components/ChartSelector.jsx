@@ -1,22 +1,7 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
 import "./ChartSelector.css";
 import { apiUrl } from "@/shared/api/api";
-
-const formatTimeMMSS = (sec) => {
-    const s = Math.max(0, Math.round(sec));
-    const m = Math.floor(s / 60);
-    const ss = s % 60;
-    return `${m.toString().padStart(2, "0")}:${ss.toString().padStart(2, "0")}`;
-};
-
-const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const parts = dateString.split("-");
-    if (parts.length === 3) {
-        return `${parts[2]}.${parts[1]}.${parts[0]}`;
-    }
-    return dateString;
-};
+import { formatTimeMMSS, formatDate } from "@/shared/lib/formatters";
 
 const groupAndFormatCharts = (chartList) => {
     if (!chartList || chartList.length === 0) return [];
