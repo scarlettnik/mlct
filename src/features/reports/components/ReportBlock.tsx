@@ -1,8 +1,15 @@
-import React from "react";
-import { generatePdfFromHtml } from "@/features/reports/lib/pdfGenerator";
-import "@/app/panel/[id]/style.css"
+'use client';
 
-const ReportBlock = ({ reportData }) => {
+import React, { useRef, type JSX } from "react";
+import { generatePdfFromHtml } from "@/features/reports/lib/pdfGenerator";
+import "@/app/panel/[id]/style.css";
+import type { Examination } from "@/shared/api/types";
+
+interface ReportBlockProps {
+    reportData: Examination;
+}
+
+const ReportBlock = ({ reportData }: ReportBlockProps): JSX.Element => {
     const stats = reportData?.stats;
 
     let pathologyClass = 'path-normal';
@@ -12,10 +19,12 @@ const ReportBlock = ({ reportData }) => {
         pathologyClass = 'path-pathological';
     }
 
-    const reportRef = React.useRef(null);
+    const reportRef = useRef<HTMLDivElement>(null);
 
-    const generatePdfReport = () => {
-        generatePdfFromHtml(reportRef.current, 'КТГ_Отчет');
+    const generatePdfReport = (): void => {
+        if (reportRef.current) {
+            generatePdfFromHtml(reportRef.current, 'КТГ_Отчет');
+        }
     };
 
     return (

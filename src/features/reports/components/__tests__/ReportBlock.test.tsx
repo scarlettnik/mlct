@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import ReportBlock from '../ReportBlock';
 import { generatePdfFromHtml } from "@/features/reports/lib/pdfGenerator";
 
@@ -22,7 +23,7 @@ describe('ReportBlock', () => {
     };
 
     it('renders report statistics correctly', () => {
-        render(<ReportBlock reportData={mockReportData} />);
+        render(<ReportBlock reportData={mockReportData as any} />);
         
         expect(screen.getByText('140.5 уд')).toBeInTheDocument();
         expect(screen.getByText('20.2')).toBeInTheDocument();
@@ -31,7 +32,7 @@ describe('ReportBlock', () => {
     });
 
     it('calls generatePdfFromHtml when download button is clicked', () => {
-        render(<ReportBlock reportData={mockReportData} />);
+        render(<ReportBlock reportData={mockReportData as any} />);
         
         fireEvent.click(screen.getByText('Скачать отчет'));
         expect(generatePdfFromHtml).toHaveBeenCalled();
@@ -41,7 +42,7 @@ describe('ReportBlock', () => {
         const suspiciousData = {
             stats: { ...mockReportData.stats, condition: 'Suspicious' }
         };
-        const { container } = render(<ReportBlock reportData={suspiciousData} />);
+        const { container } = render(<ReportBlock reportData={suspiciousData as any} />);
         
         const statusElement = container.querySelector('.path-suspicious');
         expect(statusElement).toBeInTheDocument();

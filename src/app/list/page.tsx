@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import './styles.css';
+import '@/app/list/styles.css';
 import useUsers from "@/features/patients/api/Patients";
-import React, {useState} from "react";
+import React, { useState, type JSX } from "react";
 import EditPatientModal from "@/features/patients/components/EditPatientModal";
+import type { Patient } from "@/shared/api/types";
 
-const ArrowRight = () => (
+const ArrowRight = (): JSX.Element => (
     <svg
         className="arrow-icon"
         xmlns="http://www.w3.org/2000/svg"
@@ -22,13 +23,17 @@ const ArrowRight = () => (
     </svg>
 );
 
-const getStateClass = (state) => {
+const getStateClass = (state?: string): string => {
     if (state === "требуется внимание") return "state-warning";
     if (state === "стабильное состояние") return "state-stable";
     return "state-critical";
 };
 
-const UserBentoCard = ({ user }) => {
+interface UserBentoCardProps {
+    user: Patient;
+}
+
+const UserBentoCard = ({ user }: UserBentoCardProps): JSX.Element => {
     const hasName = Boolean(user?.misc_data?.name);
     const displayName = user?.misc_data?.name || `Фамилия Имя Отчество ${user.id}`;
     const stateClass = getStateClass(user?.misc_data?.overall_state);
@@ -59,14 +64,15 @@ const UserBentoCard = ({ user }) => {
     );
 };
 
-const BentoUserList = () => {
-    const {users, isLoading, error, refetch} = useUsers();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+const BentoUserList = (): JSX.Element => {
+    const { users, isLoading, error, refetch } = useUsers();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-    const handlePatientSaveSuccess = () => {
+    const handlePatientSaveSuccess = (): void => {
         setIsModalOpen(false);
         refetch();
     };
+
     if (isLoading) {
         return (
             <div className="bento-grid-container">
@@ -75,12 +81,12 @@ const BentoUserList = () => {
                     <div className="spinner-container">
                         <div className="spinner"></div>
                     </div>
-
                     <p className="loading-state">Загрузка пациентов...</p>
                 </div>
             </div>
         );
     }
+
     if (error) {
         return (
             <div className="bento-grid-container">
@@ -103,40 +109,41 @@ const BentoUserList = () => {
         );
     }
 
-    return ( <>
-        <div className="bento-grid-container">
-            <div className="list-toolbar">
-                <div>
-                    <h2 className="grid-title">Пациенты</h2>
-                    <p className="grid-subtitle">Выберите карту пациента для просмотра КТГ и заключений.</p>
+    return (
+        <>
+            <div className="bento-grid-container">
+                <div className="list-toolbar">
+                    <div>
+                        <h2 className="grid-title">Пациенты</h2>
+                        <p className="grid-subtitle">Выберите карту пациента для просмотра КТГ и заключений.</p>
+                    </div>
+                    <button
+                        className="edit-button add-patient-button"
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Добавить пациента
+                    </button>
                 </div>
                 <button
-                    className="edit-button add-patient-button"
+                    className="edit-button add-patient-button mobile-add-button"
                     onClick={() => setIsModalOpen(true)}
                 >
                     Добавить пациента
                 </button>
+                <div className="bento-list">
+                    {users.map((user: Patient) => (
+                        <UserBentoCard
+                            key={user.id}
+                            user={user}
+                        />
+                    ))}
+                </div>
             </div>
-            <button
-                className="edit-button add-patient-button mobile-add-button"
-                onClick={() => setIsModalOpen(true)}
-            >
-                Добавить пациента
-            </button>
-            <div className="bento-list">
-                {users.map((user, index) => (
-                    <UserBentoCard
-                        key={user.id}
-                        user={user}
-                    />
-                ))}
-            </div>
-        </div>
             {isModalOpen && (
                 <EditPatientModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    successAdd = {handlePatientSaveSuccess}
+                    successAdd={handlePatientSaveSuccess}
                 />
             )}
         </>

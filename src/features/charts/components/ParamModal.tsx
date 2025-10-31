@@ -1,9 +1,18 @@
-import React from 'react';
-import "@/shared/ui/Modal.css";
-import './Param.css'
+'use client';
 
-const ParamModal = ({ isOpen, onClose, analysisStats }) => {
-    const secondsToMinutes = (seconds) => {
+import React, { type JSX } from 'react';
+import "@/shared/ui/Modal.css";
+import './Param.css';
+import type { ExaminationStats } from "@/shared/api/types";
+
+interface ParamModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    analysisStats?: ExaminationStats;
+}
+
+const ParamModal = ({ isOpen, onClose, analysisStats }: ParamModalProps): JSX.Element | null => {
+    const secondsToMinutes = (seconds: number): string => {
         return (seconds / 60).toFixed(2);
     };
 

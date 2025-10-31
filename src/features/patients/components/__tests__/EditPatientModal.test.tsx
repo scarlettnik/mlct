@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import EditPatientModal from '../EditPatientModal';
 
 // Mock global fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.Mock;
 
 // Mock useParams
 jest.mock('next/navigation', () => ({
@@ -27,7 +28,7 @@ describe('EditPatientModal', () => {
     });
 
     it('renders with existing patient data', async () => {
-        render(<EditPatientModal isOpen={true} patientData={mockPatientData} onClose={mockOnClose} />);
+        render(<EditPatientModal isOpen={true} patientData={mockPatientData as any} onClose={mockOnClose} />);
         
         expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
         expect(screen.getByDisplayValue('1')).toBeInTheDocument();
@@ -35,14 +36,14 @@ describe('EditPatientModal', () => {
 
     it('validates required fields before submission', async () => {
         window.alert = jest.fn();
-        render(<EditPatientModal isOpen={true} patientData={null} onClose={mockOnClose} />);
+        render(<EditPatientModal isOpen={true} patientData={undefined} onClose={mockOnClose} />);
         
         // Wait for modal to render
         await screen.findByText('Сохранить');
         
         // Find the form and submit it directly
         const form = screen.getByRole('button', { name: /Сохранить/i }).closest('form');
-        fireEvent.submit(form);
+        if (form) fireEvent.submit(form);
 
         await waitFor(() => {
             expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('введите имя'));
@@ -50,17 +51,17 @@ describe('EditPatientModal', () => {
     });
 
     it('submits form data successfully', async () => {
-        fetch.mockResolvedValueOnce({
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             text: async () => 'OK',
-        });
+        } as any);
 
-        render(<EditPatientModal isOpen={true} patientData={mockPatientData} onSuccess={mockOnSuccess} />);
+        render(<EditPatientModal isOpen={true} patientData={mockPatientData as any} onSuccess={mockOnSuccess} onClose={mockOnClose} />);
         
         fireEvent.click(screen.getByText('Сохранить'));
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalledWith(
+            expect(global.fetch).toHaveBeenCalledWith(
                 expect.stringContaining('/v1/patients/1'),
                 expect.objectContaining({ method: 'PATCH' })
             );
@@ -70,13 +71,13 @@ describe('EditPatientModal', () => {
 
     it('handles API errors', async () => {
         window.alert = jest.fn();
-        fetch.mockResolvedValueOnce({
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 400,
             text: async () => 'Bad Request',
-        });
+        } as any);
 
-        render(<EditPatientModal isOpen={true} patientData={mockPatientData} />);
+        render(<EditPatientModal isOpen={true} patientData={mockPatientData as any} onClose={mockOnClose} />);
         
         fireEvent.click(screen.getByText('Сохранить'));
 

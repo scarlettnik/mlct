@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, type JSX } from "react";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -8,33 +8,89 @@ import {
     PointElement,
     LineElement,
     Tooltip,
+    type ChartOptions,
+    type ChartData,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import annotationPlugin from "chartjs-plugin-annotation";
 import "./style.css";
-import UploadModal from "@/features/patients/components/UploadData";
 import ParamModal from "@/features/charts/components/ParamModal";
 import HRTSettingsModal from "@/features/patients/components/HRTSettingsModal";
 import NextPartModal from "@/shared/ui/GoToNetx";
 import MonInfo from "@/features/monitoring/components/MonInfo";
+import { useParams } from "next/navigation";
 import { websocketUrl } from "@/shared/api/api";
+import type { ExaminationStats } from "@/shared/api/types";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, annotationPlugin);
 
 const ALERT_SOUND_PATH = "/alarm.mp3";
 
-const safeParseJSON = (raw) => {
+interface WSInterval {
+    start: number;
+    end: number;
+    message?: string;
+}
+
+interface WSPrediction {
+    messages?: string[];
+}
+
+interface WSPlotPoint {
+    channel: "bpm" | "uterus";
+    point: [number, number]; // [time, value]
+}
+
+interface WSStateData {
+    bpm: [number, number][];
+    uterus: [number, number][];
+}
+
+interface WSState {
+    sent_part_data?: WSStateData;
+    sent_intervals?: WSInterval[];
+    sent_predictions?: WSPrediction;
+    last_stats?: ExaminationStats;
+}
+
+interface SocketMessage {
+    interval?: WSInterval;
+    prediction?: WSPrediction;
+    stats?: ExaminationStats;
+    status?: string;
+    plot?: WSPlotPoint;
+    state?: WSState;
+}
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+interface HRTThresholds {
+    min: number;
+    max: number;
+    volume: number;
+}
+
+const safeParseJSON = (raw: string): SocketMessage | null => {
     try {
         let parsed = JSON.parse(raw);
         if (typeof parsed === "string") parsed = JSON.parse(parsed);
-        return parsed;
+        return parsed as SocketMessage;
     } catch (e) {
         console.warn("safeParseJSON failed:", e, raw);
         return null;
     }
 };
 
-const generateOptions = (yMin, yMax, xMin, xMax, annotations = {}) => ({
+const generateOptions = (
+    yMin: number,
+    yMax: number,
+    xMin: number,
+    xMax: number,
+    annotations: Record<string, any> = {}
+): ChartOptions<'line'> => ({
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
@@ -52,13 +108,14 @@ const generateOptions = (yMin, yMax, xMin, xMax, annotations = {}) => ({
             ticks: {
                 color: "black",
                 stepSize: 3,
-                callback: (value) => {
+                callback: (tickValue: string | number) => {
+                    const value = Number(tickValue);
                     const m = Math.floor(value / 60);
                     const s = Math.floor(value % 60);
                     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
                 },
             },
-                    grid: { color: "rgba(38, 55, 70, 0.16)" },
+            grid: { color: "rgba(38, 55, 70, 0.16)" },
         },
         y: {
             display: true,
@@ -74,7 +131,7 @@ const generateOptions = (yMin, yMax, xMin, xMax, annotations = {}) => ({
     },
 });
 
-const makeBoxAnnotations = (intervals) =>
+const makeBoxAnnotations = (intervals: WSInterval[]): Record<string, any> =>
     Object.fromEntries(
         intervals.map((a, i) => [
             `interval-${i}`,
@@ -102,8 +159,8 @@ const makeBoxAnnotations = (intervals) =>
         ])
     );
 
-function Clock() {
-    const [timeStr, setTimeStr] = useState("");
+function Clock(): JSX.Element {
+    const [timeStr, setTimeStr] = useState<string>("");
     useEffect(() => {
         const update = () => setTimeStr(new Date().toLocaleString());
         update();
@@ -113,31 +170,45 @@ function Clock() {
     return <span>{timeStr}</span>;
 }
 
-export default function FetalMonitor() {
-    const [heartRateData, setHeartRateData] = useState([]);
-    const [toneData, setToneData] = useState([]);
-    const [latestTime, setLatestTime] = useState(0);
-    const [analysisStats, setAnalysisStats] = useState(null);
-    const [intervals, setIntervals] = useState([]);
-    const [prediction, setPrediction] = useState([]);
-    const [patientId, setPatientId] = useState(null);
-    const [patInfo, setPatInfo] = useState(false);
-    const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+export default function FetalMonitor(): JSX.Element {
+    const [heartRateData, setHeartRateData] = useState<Point[]>([]);
+    const [toneData, setToneData] = useState<Point[]>([]);
+    const [latestTime, setLatestTime] = useState<number>(0);
+    const [analysisStats, setAnalysisStats] = useState<ExaminationStats | null>(null);
+    const [intervals, setIntervals] = useState<WSInterval[]>([]);
+    const [prediction, setPrediction] = useState<WSPrediction>({});
+    const [patientId, setPatientId] = useState<string | null>(null);
+    const [patInfo, setPatInfo] = useState<boolean>(false);
+    const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
+    const param = useParams();
+    const [isNext, setIsNext] = useState<boolean>(false);
 
-
-    const socketRef = useRef(null);
+    const socketRef = useRef<WebSocket | null>(null);
     const bufferSeconds = 600;
 
-    const [wsUrl, setWsUrl] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(true);
-    const [paramModalOpen, setParamModalOpen] = useState(false);
-    const [isDangerModalOpen, setIsDangerModalOpen] = useState(false);
-    const [isNextModalOpen, setIsNextModalOpen] = useState(false);
-    const [hrtThresholds, setHrtThresholds] = useState({ min: 60, max: 160, volume: 80 });
-    const audioRef = useRef(null);
+    const [paramModalOpen, setParamModalOpen] = useState<boolean>(false);
+    const [isDangerModalOpen, setIsDangerModalOpen] = useState<boolean>(false);
+    const [isNextModalOpen, setIsNextModalOpen] = useState<boolean>(false);
+    const [hrtThresholds, setHrtThresholds] = useState<HRTThresholds>({ min: 60, max: 160, volume: 80 });
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    const [viewStart, setViewStart] = useState(0);
+    const [viewStart, setViewStart] = useState<number>(0);
     const viewDuration = 90;
+
+    const isInitialLoadRef = useRef<boolean>(true);
+
+    const handleNextPart = () => {
+        setHeartRateData([]);
+        setToneData([]);
+        setIntervals([]);
+        setAnalysisStats(null);
+    };
+
+    useEffect(() => {
+        if (isNextModalOpen) {
+            handleNextPart();
+        }
+    }, [isNextModalOpen]);
 
     useEffect(() => {
         if (typeof window !== "undefined" && !audioRef.current) {
@@ -179,18 +250,66 @@ export default function FetalMonitor() {
     }, [latestTime]);
 
     useEffect(() => {
-        if (!wsUrl) return;
+        const paramPatientId = Array.isArray(param.patientId) ? param.patientId[0] : param.patientId;
+        const paramExamId = Array.isArray(param.id) ? param.id[0] : param.id;
+        
+        if (!paramPatientId || !paramExamId) {
+            console.error("Missing patientId or examId in parameters, cannot connect to WebSocket.");
+            return;
+        }
+
+        setPatientId(paramPatientId);
+
+        const wsUrl = websocketUrl(`/v1/patients/${paramPatientId}/examinations/${paramExamId}/emulation/attach`);
+
         const ws = new WebSocket(wsUrl);
         socketRef.current = ws;
 
-        ws.onmessage = (event) => {
+        ws.onmessage = (event: MessageEvent) => {
             const msg = safeParseJSON(event.data);
             if (!msg) return;
+            setIsNext(false);
+            if (msg.state && isInitialLoadRef.current) {
+                const { sent_part_data, sent_intervals, sent_predictions, last_stats } = msg.state;
 
+                let lastTime = 0;
+
+                if (sent_part_data) {
+                    const newHeartRateData: Point[] = sent_part_data.bpm.map(([x, y]) => ({ x: Number(x), y: Number(y) }));
+                    const newToneData: Point[] = sent_part_data.uterus.map(([x, y]) => ({ x: Number(x), y: Number(y) }));
+
+                    setHeartRateData(newHeartRateData);
+                    setToneData(newToneData);
+
+                    if (newHeartRateData.length > 0) {
+                        lastTime = Math.max(lastTime, newHeartRateData[newHeartRateData.length - 1].x);
+                    }
+                    if (newToneData.length > 0) {
+                        lastTime = Math.max(lastTime, newToneData[newToneData.length - 1].x);
+                    }
+                }
+
+                if (sent_intervals) {
+                    setIntervals(sent_intervals);
+                }
+
+                if (sent_predictions) {
+                    setPrediction(sent_predictions);
+                }
+
+                if (last_stats) {
+                    setAnalysisStats(last_stats);
+                }
+
+                setLatestTime((current) => Math.max(current, lastTime));
+
+                isInitialLoadRef.current = false;
+                return;
+            }
             if (msg.interval) {
                 setIntervals((prev) => {
                     const newInt = msg.interval;
-                    if (!newInt.start || !newInt.end) return prev;
+                    if (!newInt || typeof newInt.start !== 'number' || typeof newInt.end !== 'number') return prev;
                     const exists = prev.some(
                         (i) => i.start === newInt.start && i.end === newInt.end
                     );
@@ -211,6 +330,7 @@ export default function FetalMonitor() {
 
             if (msg.status === "waiting-for-next-command") {
                 setIsNextModalOpen(true);
+                setIsNext(true);
                 return;
             }
 
@@ -219,8 +339,9 @@ export default function FetalMonitor() {
                 const [time, value] = point.map(Number);
                 if (!Number.isFinite(time) || !Number.isFinite(value)) return;
 
-                const updateData = (prev) => {
-                    const cutoff = time - bufferSeconds;
+                const updateData = (prev: Point[]) => {
+                    const cutoff = isInitialLoadRef.current ? -Infinity : time - bufferSeconds;
+
                     const filtered = prev.filter((p) => p.x >= cutoff);
                     return [...filtered, { x: time, y: value }];
                 };
@@ -231,38 +352,8 @@ export default function FetalMonitor() {
             }
         };
 
-        ws.onerror = (e) => console.error("WS error:", e);
-
         return () => ws.close();
-    }, [wsUrl]);
-
-    const handleUploadSuccess = (patientId, serverData) => {
-        setIsModalOpen(false);
-        const examId = serverData?.id;
-        if (!examId) return alert("Не удалось получить ID обследования");
-        setPatientId(patientId);
-        const newWsUrl = websocketUrl(`/v1/patients/${patientId}/examinations/${examId}/emulation/start`);
-        setWsUrl(newWsUrl);
-        setHeartRateData([]);
-        setToneData([]);
-        setIntervals([]);
-        setLatestTime(0);
-        setViewStart(0);
-        setAnalysisStats(null);
-    };
-
-    const handleNextPart = () => {
-        socketRef.current?.send(JSON.stringify({ command: "next-part" }));
-        setHeartRateData([]);
-        setToneData([]);
-        setIntervals([]);
-        setIsNextModalOpen(false);
-        setAnalysisStats(null);
-    };
-
-    const handleScrollBack = () => {
-        setViewStart((prev) => Math.max(0, prev - viewDuration / 3));
-    };
+    }, [param.patientId, param.id]);
 
     const annotations = makeBoxAnnotations(intervals);
 
@@ -274,7 +365,7 @@ export default function FetalMonitor() {
         return intervals[intervals.length - 1];
     }, [intervals]);
 
-    const heartRateChartData = useMemo(
+    const heartRateChartData: ChartData<'line'> = useMemo(
         () => ({
             datasets: [
                 {
@@ -289,7 +380,7 @@ export default function FetalMonitor() {
         [heartRateData]
     );
 
-    const toneChartData = useMemo(
+    const toneChartData: ChartData<'line'> = useMemo(
         () => ({
             datasets: [
                 {
@@ -324,10 +415,10 @@ export default function FetalMonitor() {
                 <div className="fm-main">
                     <div className="fm-graphs">
                         <div className="fm-graph">
-                            <Line data={heartRateChartData} options={heartRateOptions}/>
+                            <Line data={heartRateChartData as any} options={heartRateOptions}/>
                         </div>
                         <div className="fm-graph">
-                            <Line data={toneChartData} options={toneOptions}/>
+                            <Line data={toneChartData as any} options={toneOptions}/>
                         </div>
                     </div>
 
@@ -348,7 +439,7 @@ export default function FetalMonitor() {
                                     <div className="fm-analysis-item">
                                         <div className="fm-analysis-label">Продолжительность:</div>
                                         <div
-                                            className="fm-analysis-value">{Math.round(Math.abs(lastInterval?.end - lastInterval?.start))} сек
+                                            className="fm-analysis-value">{Math.round(Math.abs((lastInterval?.end || 0) - (lastInterval?.start || 0)))} сек
                                         </div>
                                     </div>
                                     <div className="fm-analysis-item">
@@ -361,12 +452,11 @@ export default function FetalMonitor() {
                             )}
                         </div>
 
-
                         <div className="fm-analysis-info">
                             <p className="fm-panel-title">Предсказание</p>
-                            {prediction.messages ? (
+                            {prediction.messages && prediction.messages.length > 0 ? (
                                 <>
-                                    {prediction?.messages?.map((msg, index) => (
+                                    {prediction.messages.map((msg, index) => (
                                         <p key={index}>{msg}</p>
                                     ))}
                                 </>
@@ -377,42 +467,37 @@ export default function FetalMonitor() {
                     </div>
                 </div>
 
-
                 <footer className="fm-footer">
                     <button className="fm-button"
                             onClick={() => setIsSoundEnabled(!isSoundEnabled)}
                     >
                         {isSoundEnabled ? "Выключить звук тревоги" : "Включить звук тревоги"}
                     </button>
+
                     <button className="fm-button"
                             onClick={() => setIsDangerModalOpen(true)}>Параметры тревоги
                     </button>
                     <button className="fm-button" onClick={() => setPatInfo(true)}>Информация о
                         пациенте
                     </button>
-                    <button className="fm-button" onClick={() => setParamModalOpen(true)}
-                            disabled={!analysisStats}>
+                    <button className="fm-button" onClick={() => setParamModalOpen(true)} disabled={!analysisStats}>
                         Статистический анализ
                     </button>
                 </footer>
             </div>
 
-            <UploadModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onUploadSuccess={handleUploadSuccess}
-            />
-
             <ParamModal
                 isOpen={paramModalOpen}
                 onClose={() => setParamModalOpen(false)}
-                analysisStats={analysisStats}
+                analysisStats={analysisStats || undefined}
             />
-            <MonInfo
-                isOpen={patInfo}
-                onClose={() => setPatInfo(false)}
-                patientId={patientId}
-            />
+            {patientId && (
+                <MonInfo
+                    isOpen={patInfo}
+                    onClose={() => setPatInfo(false)}
+                    patientId={patientId as string}
+                />
+            )}
             <HRTSettingsModal
                 isOpen={isDangerModalOpen}
                 initialMinHRT={hrtThresholds.min}
@@ -423,10 +508,9 @@ export default function FetalMonitor() {
                 onSave={(min, max, vol) => setHrtThresholds({ min, max, volume: vol })}
             />
 
-            <NextPartModal
-                isOpen={isNextModalOpen}
-                onNext={handleNextPart}
-            />
+            {isNext && <div className="fm-next-alert">
+              Данная часть исследования закончилась, чтобы продолжить нажмите продолжить на экране монитора
+            </div>}
         </>
     );
 }

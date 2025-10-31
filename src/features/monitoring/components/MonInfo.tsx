@@ -1,11 +1,18 @@
 'use client'
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState, type JSX} from "react";
 import EditPatientModal from "@/features/patients/components/EditPatientModal";
 import { apiUrl } from "@/shared/api/api";
+import type { Patient } from "@/shared/api/types";
 import "@/shared/ui/Modal.css";
 
-const MonInfo = ({patientId, onClose, isOpen}) => {
-    const [patient, setPatient] = useState(null);
+interface MonInfoProps {
+    patientId: number | string;
+    onClose: () => void;
+    isOpen: boolean;
+}
+
+const MonInfo = ({patientId, onClose, isOpen}: MonInfoProps): JSX.Element | null => {
+    const [patient, setPatient] = useState<Patient | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const fetchPatientData = useCallback(async () => {
         if (!patientId) {
@@ -79,18 +86,18 @@ const MonInfo = ({patientId, onClose, isOpen}) => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {patient?.info?.blood_gas?.length > 0 ? (
-                                    patient.info.blood_gas.map((item, index) => (
-                                        <tr key={index}>
+                                {Array.isArray(patient?.info?.blood_gas) && patient.info.blood_gas.length > 0 ? (
+                                    patient.info.blood_gas.map((item: any, index: number) => (
+                                        <tr key={`bga-${index}`}>
                                             <td>{item?.name}</td>
-                                            <td>{item?.value}</td>
+                                            <td>{String(item?.value || '')}</td>
                                             <td>{item?.unit}</td>
                                             <td>{item?.normal}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="4" className="empty-table-cell">Нет данных по газу в крови.</td>
+                                        <td colSpan={4} className="empty-table-cell">Нет данных по газу в крови.</td>
                                     </tr>
                                 )}
                                 </tbody>
@@ -106,7 +113,7 @@ const MonInfo = ({patientId, onClose, isOpen}) => {
                     isOpen={isModalOpen}
                     onSuccess={handleModalClose}
                     onClose={() => setIsModalOpen(false)}
-                    patientData={patient}
+                    patientData={patient || undefined}
                 />
             )}
         </div>

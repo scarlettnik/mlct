@@ -7,9 +7,16 @@ const defaultKeys = [
     '0', 'Backspace', 'Done'
 ];
 
-export default function VirtualKeyboard({ onKeyPress, onDone, targetValue, keys = defaultKeys }) {
+interface VirtualKeyboardProps {
+    onKeyPress: (value: string) => void;
+    onDone?: () => void;
+    targetValue: string;
+    keys?: string[];
+}
 
-    const handleKeyClick = (key) => {
+export default function VirtualKeyboard({ onKeyPress, onDone, targetValue, keys = defaultKeys }: VirtualKeyboardProps): React.ReactNode {
+
+    const handleKeyClick = (key: string) => {
         if (key === 'Backspace') {
             onKeyPress(targetValue.slice(0, -1));
         } else if (key === 'Done') {

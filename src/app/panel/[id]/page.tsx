@@ -9,16 +9,21 @@ import {
     LineElement,
     Filler,
     Tooltip,
+    ChartOptions,
+    ChartData,
+    Scale,
+    Tick,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import './style.css'
 import annotationPlugin from 'chartjs-plugin-annotation';
 import ReportBlock from "@/features/reports/components/ReportBlock";
-import ChartSelector from "@/features/charts/components/ChartSelector";
+import ChartSelector, { SelectedChart } from "@/features/charts/components/ChartSelector";
 import PatientInfo from "@/features/patients/components/PatientInfo";
 import { useParams, useRouter } from "next/navigation";
 import { apiUrl } from "@/shared/api/api";
 import { formatTimeMMSS } from "@/shared/lib/formatters";
+import type { Patient, Examination } from "@/shared/api/types";
 
 ChartJS.register(
     CategoryScale,
@@ -30,7 +35,12 @@ ChartJS.register(
     annotationPlugin
 );
 
-const transformChartData = (jsonArr) => {
+interface DataPoint {
+    time_sec: number;
+    value: number;
+}
+
+const transformChartData = (jsonArr: any[]): DataPoint[] => {
     if (!Array.isArray(jsonArr)) return [];
 
     return jsonArr
@@ -41,27 +51,44 @@ const transformChartData = (jsonArr) => {
         }));
 };
 
+interface ExaminationDataState {
+    part: {
+        data: {
+            bpm: any[];
+            uterus: any[];
+        };
+        intervals?: Array<{
+            start: number;
+            end: number;
+            message: string;
+        }>;
+        id?: number;
+        metadata?: any;
+    };
+    exam: Examination | null;
+}
+
 export default function FetalMonitor() {
     const router = useRouter();
     const params = useParams();
-    const patientId = params.id;
+    const patientId = params?.id as string;
 
     const hrLoading = false;
     const toneLoading = false;
-    const hrChartRef = useRef(null);
-    const containerRef = useRef(null);
+    const hrChartRef = useRef<ChartJS<"line">>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const [isPatientDataLoading, setIsPatientDataLoading] = useState(true);
-    const [patientFetchError, setPatientFetchError] = useState(null);
+    const [patientFetchError, setPatientFetchError] = useState<string | null>(null);
 
-    const [patientData, setPatientData] = useState({});
+    const [patientData, setPatientData] = useState<Patient>({ id: 0 });
 
-    const [currentChartId, setCurrentChartId] = useState(null);
-    const [selectedExaminationData, setSelectedExaminationData] = useState({
+    const [currentChartId, setCurrentChartId] = useState<number | null>(null);
+    const [selectedExaminationData, setSelectedExaminationData] = useState<ExaminationDataState>({
         part: { data: { bpm: [], uterus: [] } },
         exam: null
     });
-    const [selectedExaminationDetails, setSelectedExaminationDetails] = useState(null);
+    const [selectedExaminationDetails, setSelectedExaminationDetails] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const heartRateData = useMemo(() => {
@@ -74,8 +101,8 @@ export default function FetalMonitor() {
         return transformChartData(uterusData);
     }, [selectedExaminationData.part]);
 
-    const selectChart = useCallback((chartId, partData, examData) => {
-        setCurrentChartId(chartId);
+    const selectChart = useCallback((chartId: SelectedChart, partData: any, examData: any) => {
+        setCurrentChartId(chartId.examinationId);
         const safePartData = partData?.data ? partData : { data: { bpm: [], uterus: [] } };
         setSelectedExaminationData({ part: safePartData, exam: examData });
         setSelectedExaminationDetails(partData);
@@ -85,8 +112,6 @@ export default function FetalMonitor() {
     const patientDataUnread = patientData.misc_data?.unread;
 
     const fetchPatientData = useCallback(async (isInitialLoad = false) => {
-        let isMounted = true;
-
         if (isInitialLoad) {
             setIsPatientDataLoading(true);
         }
@@ -94,7 +119,7 @@ export default function FetalMonitor() {
 
         if (!patientId) {
             console.warn("patientId не определен. Пропуск загрузки данных.");
-            if (isMounted && isInitialLoad) setIsPatientDataLoading(false);
+            if (isInitialLoad) setIsPatientDataLoading(false);
             return;
         }
 
@@ -105,31 +130,27 @@ export default function FetalMonitor() {
                 throw new Error(`Ошибка HTTP: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data: Patient = await response.json();
 
-            if (isMounted) {
-                setPatientData(data);
-                if (isInitialLoad && data.examinations && data.examinations.length > 0) {
-                    const firstExam = data.examinations[0];
-                    setCurrentChartId(firstExam.id);
-                    setSelectedExaminationData({
-                        part: { data: { bpm: [], uterus: [] } },
-                        exam: firstExam
-                    });
-                }
-                if (isInitialLoad) {
-                    setFreeComment(data.comment || '');
-                    setIsCommentLoading(false);
-                }
+            setPatientData(data);
+            if (isInitialLoad && data.examinations && data.examinations.length > 0) {
+                const firstExam = data.examinations[0];
+                setCurrentChartId(firstExam.id);
+                setSelectedExaminationData({
+                    part: { data: { bpm: [], uterus: [] } },
+                    exam: firstExam
+                });
+            }
+            if (isInitialLoad) {
+                setFreeComment(data.comment || '');
+                setIsCommentLoading(false);
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Ошибка при получении данных пациента:", error);
-            if (isMounted) {
-                setPatientFetchError(`Не удалось загрузить данные пациента: ${error.message}`);
-            }
+            setPatientFetchError(`Не удалось загрузить данные пациента: ${error.message}`);
         } finally {
-            if (isMounted && isInitialLoad) {
+            if (isInitialLoad) {
                 setIsPatientDataLoading(false);
             }
         }
@@ -184,12 +205,13 @@ export default function FetalMonitor() {
 
         setIsSaving(true);
         try {
-            const response = await fetch(apiUrl(`/v1/patients/${patientId}`), {
+            await fetch(apiUrl(`/v1/patients/${patientId}`), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: freeComment })
             });
         } catch (error) {
+            console.error("Ошибка при сохранении комментария:", error);
         } finally {
             setIsSaving(false);
         }
@@ -197,7 +219,7 @@ export default function FetalMonitor() {
 
     const dynamicAnnotations = useMemo(() => {
         if (!selectedExaminationDetails?.intervals) return [];
-        return selectedExaminationDetails.intervals.map((int, idx) => ({
+        return selectedExaminationDetails.intervals.map((int: any, idx: number) => ({
             id: `interval-${idx}`,
             title: `Интервал ${idx + 1}`,
             description: int.message,
@@ -206,7 +228,7 @@ export default function FetalMonitor() {
         }));
     }, [selectedExaminationDetails]);
 
-    const makeBoxAnnotations = (annots) =>
+    const makeBoxAnnotations = (annots: any[]) =>
         Object.fromEntries(
             annots.map((a) => [
                 a.id,
@@ -223,8 +245,8 @@ export default function FetalMonitor() {
             ])
         );
 
-    const [zoomRange, setZoomRange] = useState(null);
-    const [selectedAnnotation, setSelectedAnnotation] = useState(null);
+    const [zoomRange, setZoomRange] = useState<[number, number] | null>(null);
+    const [selectedAnnotation, setSelectedAnnotation] = useState<any>(null);
 
     const { sortedHR, sortedUC, xMin, xMax } = useMemo(() => {
         const hr = Array.isArray(heartRateData) ? [...heartRateData] : [];
@@ -250,7 +272,7 @@ export default function FetalMonitor() {
         }
     }, [xMin, xMax, zoomRange]);
 
-    const handleChartClick = useCallback((event, elements, chart) => {
+    const handleChartClick = useCallback((event: any, elements: any[], chart: any) => {
         if (!chart) {
             setSelectedAnnotation(null);
             return;
@@ -262,7 +284,7 @@ export default function FetalMonitor() {
         const xValue = chart.scales.x.getValueForPixel(clickX);
 
         const hit = dynamicAnnotations.find(
-            (a) => xValue >= a.xMin && xValue <= a.xMax
+            (a: any) => xValue >= a.xMin && xValue <= a.xMax
         );
 
         setSelectedAnnotation(hit);
@@ -288,7 +310,7 @@ export default function FetalMonitor() {
         );
     }
 
-    let chartPlaceholderText = null;
+    let chartPlaceholderText: string | null = null;
 
     if (!isExaminationSelected) {
         chartPlaceholderText = "Выберите исследование";
@@ -300,7 +322,7 @@ export default function FetalMonitor() {
         <p className="chart-status-text">{chartPlaceholderText}</p>
     ) : null;
 
-    const baseX = {
+    const baseX: any = {
         type: "linear",
         min: xMin,
         max: xMax,
@@ -308,7 +330,7 @@ export default function FetalMonitor() {
             color: "black",
             stepSize: 1,
             autoSkip: true,
-            callback: (value) => {
+            callback: (value: number) => {
                 const v = Math.round(value);
                 return formatTimeMMSS(v);
             },
@@ -319,17 +341,17 @@ export default function FetalMonitor() {
         },
     };
 
-    const createOptions = (yScaleConfig, annotations) => ({
+    const createOptions = (yScaleConfig: any, annotations: any[]): ChartOptions<"line"> => ({
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        onClick: handleChartClick,
+        onClick: (event, elements, chart) => handleChartClick(event, elements, chart),
         plugins: {
             legend: { display: false },
             tooltip: { enabled: false },
             annotation: {
                 annotations: makeBoxAnnotations(annotations),
-            },
+            } as any,
         },
         scales: {
             x: baseX,
@@ -357,7 +379,7 @@ export default function FetalMonitor() {
         dynamicAnnotations
     );
 
-    const hrDataset = {
+    const hrDataset: ChartData<"line"> = {
         datasets: [{
             label: "ЧСС плода",
             data: sortedHR.map((d) => ({ x: Number(d.time_sec), y: Number(d.value) })),
@@ -369,7 +391,7 @@ export default function FetalMonitor() {
         }],
     };
 
-    const ucDataset = {
+    const ucDataset: ChartData<"line"> = {
         datasets: [{
             label: "Схватки (UC)",
             data: sortedUC.map((d) => ({ x: Number(d.time_sec), y: Number(d.value) })),
@@ -390,7 +412,7 @@ export default function FetalMonitor() {
         }
     };
 
-    const renderMetadata = (metadata) => {
+    const renderMetadata = (metadata: any) => {
         if (!metadata) return <p>Метаданные отсутствуют.</p>;
 
         return (
@@ -425,7 +447,7 @@ export default function FetalMonitor() {
             <main className="fm-main-content">
                 <PatientInfo patient={patientData} onDataUpdate={() => fetchPatientData(false)}/>
 
-                <ReportBlock reportData={selectedExaminationData?.exam}/>
+                <ReportBlock reportData={selectedExaminationData?.exam as any}/>
 
                 <div className="bento-box fm-graph fm-graph-hr">
                     <div className="chart-wrapper">
@@ -466,7 +488,7 @@ export default function FetalMonitor() {
                         <h3 className="fm-subtitle">РЕКОМЕНДАЦИИ:</h3>
                         {currentReportData?.recommendations && currentReportData?.recommendations?.length > 0 ? (
                             <ul className="clinical-list">
-                                {currentReportData?.recommendations?.map((item, index) => (
+                                {currentReportData?.recommendations?.map((item: string, index: number) => (
                                     <li key={`rec-${index}`}>{item}</li>
                                 ))}
                             </ul>
@@ -478,7 +500,7 @@ export default function FetalMonitor() {
                         <h3 className="fm-subtitle">ЗОНЫ РИСКА:</h3>
                         {currentReportData?.risk_zones && currentReportData?.risk_zones?.length > 0 ? (
                             <ul className="clinical-list">
-                                {currentReportData?.risk_zones.map((item, index) => (
+                                {currentReportData?.risk_zones.map((item: string, index: number) => (
                                     <li key={`risk-${index}`}>{item}</li>
                                 ))}
                             </ul>
@@ -490,7 +512,7 @@ export default function FetalMonitor() {
                         <h3 className="fm-subtitle">ЧТО В НОРМЕ:</h3>
                         {currentReportData?.what_in_norm && currentReportData?.what_in_norm?.length > 0 ? (
                             <ul className="clinical-list">
-                                {currentReportData?.what_in_norm?.map((item, index) => (
+                                {currentReportData?.what_in_norm?.map((item: string, index: number) => (
                                     <li key={`norm-${index}`}>{item}</li>
                                 ))}
                             </ul>

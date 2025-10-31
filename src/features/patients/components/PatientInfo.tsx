@@ -1,0 +1,83 @@
+'use client'
+
+import React, { useState } from "react";
+import "@/app/panel/[id]/style.css"
+import EditPatientModal from "@/features/patients/components/EditPatientModal";
+import type { Patient } from "@/shared/api/types";
+
+interface PatientInfoProps {
+    patient: Patient | undefined;
+    onDataUpdate?: () => void;
+}
+
+const PatientInfo = ({ patient, onDataUpdate }: PatientInfoProps): React.ReactNode => {
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        if (onDataUpdate) {
+            onDataUpdate();
+        }
+    }
+
+    return (
+        <>
+            <aside className="bento-box fm-patient-info">
+                <header className="fm-patient-header">
+                    <h2 className="fm-subtitle">Пациент</h2>
+                    <button
+                        className="edit-button"
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Редактировать
+                    </button>
+                </header>
+
+                <p className="fm-patient-name">{patient?.name || (patient ? `Фамилия Имя Отчество ${patient.id}` : 'Нет данных')}</p>
+                <div className="fm-details-group">
+                    <div className="fm-patient-detail"><p>Паритет родов:</p> <span>{patient?.info?.parity || 'Нет данных'}</span></div>
+                    <div className="fm-patient-detail"><p>Соматические
+                        заболевания: </p><span>{patient?.info?.somatic_diseases || 'Нет данных'}</span>
+                    </div>
+                    <div className="fm-patient-detail"><p>Течение беременности: </p><span>{patient?.info?.pregnancy_course || 'Нет данных'}</span>
+                    </div>
+                    <div className="fm-patient-detail"><p>Последняя менструация: </p> <span>{patient?.info?.last_menstrual_period || 'Нет данных'}</span></div>
+                </div>
+
+                <div className="fm-bga-section">
+                    <h3 className="fm-section-title">Показатели газа в крови</h3>
+                    <table className="fm-bga-table">
+                        <thead>
+                        <tr>
+                            <th>Показатель</th>
+                            <th>Значение</th>
+                            <th>Ед. изм.</th>
+                            <th>Норма</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {patient?.info?.blood_gas?.map((item: any, index: number) => (
+                            <tr key={index}>
+                                <td>{item?.name}</td>
+                                <td>{String(item?.value)}</td>
+                                <td>{item?.unit}</td>
+                                <td>{item?.normal}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </aside>
+            {isModalOpen && patient && (
+                <EditPatientModal
+                    isOpen={isModalOpen}
+                    onSuccess={handleModalClose}
+                    onClose={() => setIsModalOpen(false)}
+                    patientData={patient}
+                />
+            )}
+        </>
+    )
+}
+
+export default PatientInfo;

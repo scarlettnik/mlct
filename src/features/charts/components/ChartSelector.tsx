@@ -1,9 +1,23 @@
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+'use client';
+
+import React, { useMemo, useEffect, useState, useCallback, type JSX } from "react";
 import "./ChartSelector.css";
 import { apiUrl } from "@/shared/api/api";
 import { formatTimeMMSS, formatDate } from "@/shared/lib/formatters";
+import type { Patient, Examination } from "@/shared/api/types";
 
-const groupAndFormatCharts = (chartList) => {
+interface RecordItem {
+    id: number;
+    number: number;
+    metadata: Examination['metadata'];
+}
+
+interface GroupedChart {
+    date: string;
+    records: RecordItem[];
+}
+
+const groupAndFormatCharts = (chartList?: Examination[]): GroupedChart[] => {
     if (!chartList || chartList.length === 0) return [];
 
     const groupedMap = chartList.reduce((acc, chart) => {
@@ -16,13 +30,13 @@ const groupAndFormatCharts = (chartList) => {
             acc.set(formattedDate, []);
         }
 
-        acc.get(formattedDate).push({
+        acc.get(formattedDate)!.push({
             id: chart.id,
             metadata: chart.metadata,
         });
 
         return acc;
-    }, new Map());
+    }, new Map<string, Array<{ id: number; metadata: Examination['metadata'] }>>());
 
     return Array.from(groupedMap, ([date, records]) => ({
         date: date,
@@ -36,8 +50,22 @@ const groupAndFormatCharts = (chartList) => {
     }));
 };
 
-const ChartSelector = ({ selectChart, data, loading, patient }) => {
-    const [selected, setSelected] = useState(null);
+export interface SelectedChart {
+    examinationId: number;
+    partIndex: number;
+    recordId: number;
+}
+
+interface ChartSelectorProps {
+    selectChart: (selectedPart: SelectedChart, jsonPart: any, jsonExam: any) => void;
+    data: any[];
+    loading: boolean;
+    patient: Patient;
+    currentChartId?: number | null;
+}
+
+const ChartSelector = ({ selectChart, data, loading, patient }: ChartSelectorProps): JSX.Element => {
+    const [selected, setSelected] = useState<SelectedChart | null>(null);
 
     const groupedCharts = useMemo(() => {
         return groupAndFormatCharts(patient.examinations);
@@ -66,7 +94,7 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
         };
     }, [data, loading]);
 
-    const handleChartClick = useCallback(async (examinationId, partIndex, recordId) => {
+    const handleChartClick = useCallback(async (examinationId: number, partIndex: number, recordId: number) => {
         const selectedPart = { examinationId, partIndex, recordId };
         setSelected(selectedPart);
 
@@ -108,7 +136,7 @@ const ChartSelector = ({ selectChart, data, loading, patient }) => {
 
             handleChartClick(examinationId, partIndex, recordId);
         }
-    }, [patient?.id, groupedCharts]);
+    }, [patient?.id, groupedCharts, handleChartClick, selected]);
 
 
     return (

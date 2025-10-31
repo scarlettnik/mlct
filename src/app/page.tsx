@@ -1,7 +1,19 @@
+import React from 'react';
 import Link from 'next/link';
 import styles from './start/styles.module.css';
 
-const features = [
+interface Feature {
+    title: string;
+    description: string;
+    className: string;
+    icon: string;
+    href?: string;
+    isPrimary?: boolean;
+    isSecondary?: boolean;
+    component?: React.ComponentType;
+}
+
+const features: Feature[] = [
     {
         title: "Мониторинг КТГ",
         description: "Поток ЧСС плода и маточной активности с выделением подозрительных интервалов.",
@@ -62,7 +74,9 @@ const features = [
     },
 ];
 
-const FeatureCard = ({ title, description, className, icon, href, isPrimary, isSecondary, component: Component }) => {
+interface FeatureCardProps extends Feature {}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, className, icon, href, isPrimary, component: Component }) => {
     if (Component) {
         return (
             <div className={className}>
@@ -94,7 +108,7 @@ const FeatureCard = ({ title, description, className, icon, href, isPrimary, isS
     );
 };
 
-const FetalMonitorShowcase = () => {
+const FetalMonitorShowcase: React.FC = () => {
     return (
         <div className={styles.showcaseContainer}>
 

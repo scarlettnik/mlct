@@ -3,7 +3,7 @@
  * @param {number} sec 
  * @returns {string}
  */
-export const formatTimeMMSS = (sec) => {
+export const formatTimeMMSS = (sec: number): string => {
     const s = Math.max(0, Math.round(sec));
     const m = Math.floor(s / 60);
     const ss = s % 60;
@@ -12,10 +12,10 @@ export const formatTimeMMSS = (sec) => {
 
 /**
  * Formats date string from YYYY-MM-DD to DD.MM.YYYY.
- * @param {string} dateString 
+ * @param {string | undefined} dateString 
  * @returns {string}
  */
-export const formatDate = (dateString) => {
+export const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return "";
     const parts = dateString.split("-");
     if (parts.length === 3) {

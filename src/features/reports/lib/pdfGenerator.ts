@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export const generatePdfFromHtml = async (elementRef, fileNamePrefix = 'Report') => {
+export const generatePdfFromHtml = async (elementRef: HTMLElement | null, fileNamePrefix = 'Report'): Promise<void> => {
     if (!elementRef) {
         console.error("DOM-элемент для генерации PDF не найден.");
         return;

@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import ChartSelector from '../ChartSelector';
 
 // Mock global fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.Mock;
 
 describe('ChartSelector', () => {
     const mockSelectChart = jest.fn();
@@ -21,23 +22,23 @@ describe('ChartSelector', () => {
     });
 
     it('renders placeholder when no examinations available', () => {
-        render(<ChartSelector patient={{ ...mockPatient, examinations: [] }} />);
+        render(<ChartSelector patient={{ ...mockPatient, examinations: [] } as any} selectChart={mockSelectChart} data={[]} loading={false} />);
         expect(screen.getByText(/Нет доступных данных/)).toBeInTheDocument();
     });
 
     it('renders grouped examinations', () => {
-        render(<ChartSelector patient={mockPatient} selectChart={mockSelectChart} />);
+        render(<ChartSelector patient={mockPatient as any} selectChart={mockSelectChart} data={[]} loading={false} />);
         expect(screen.getByText('14.02.2025')).toBeInTheDocument();
         expect(screen.getByText('Запись #')).toBeInTheDocument();
     });
 
     it('calls selectChart on mount if data exists', async () => {
-        fetch.mockResolvedValue({
+        (global.fetch as jest.Mock).mockResolvedValue({
             ok: true,
             json: async () => ({ data: { bpm: [], uterus: [] } }),
-        });
+        } as any);
 
-        render(<ChartSelector patient={mockPatient} selectChart={mockSelectChart} />);
+        render(<ChartSelector patient={mockPatient as any} selectChart={mockSelectChart} data={[]} loading={false} />);
 
         await waitFor(() => {
             expect(mockSelectChart).toHaveBeenCalled();
@@ -45,18 +46,20 @@ describe('ChartSelector', () => {
     });
 
     it('handles record click', async () => {
-        fetch.mockResolvedValue({
+        (global.fetch as jest.Mock).mockResolvedValue({
             ok: true,
             json: async () => ({ data: { bpm: [] } }),
-        });
+        } as any);
 
-        render(<ChartSelector patient={mockPatient} selectChart={mockSelectChart} />);
+        render(<ChartSelector patient={mockPatient as any} selectChart={mockSelectChart} data={[]} loading={false} />);
         
         const record = screen.getByText('Запись #').parentElement;
-        fireEvent.click(record);
+        if (record) {
+            fireEvent.click(record);
+        }
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalled();
+            expect(global.fetch).toHaveBeenCalled();
         });
     });
 });

@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import useUsers from '../Patients';
 
 // Mock global fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.Mock;
 
 describe('useUsers hook', () => {
     beforeEach(() => {
@@ -17,10 +17,10 @@ describe('useUsers hook', () => {
             ]
         };
 
-        fetch.mockResolvedValueOnce({
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => mockUsers,
-        });
+        } as any);
 
         const { result } = renderHook(() => useUsers());
 
@@ -33,10 +33,10 @@ describe('useUsers hook', () => {
     });
 
     it('handles fetch error', async () => {
-        fetch.mockResolvedValueOnce({
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 500,
-        });
+        } as any);
 
         const { result } = renderHook(() => useUsers());
 
@@ -47,7 +47,7 @@ describe('useUsers hook', () => {
     });
 
     it('handles network failure', async () => {
-        fetch.mockRejectedValueOnce(new Error('Network error'));
+        (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
         const { result } = renderHook(() => useUsers());
 

@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { apiUrl } from "@/shared/api/api";
+import type { Patient } from "@/shared/api/types";
 
-const useUsers = (url = apiUrl("/v1/patients")) => {
-    const [users, setUsers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+interface UseUsersResult {
+    users: Patient[];
+    isLoading: boolean;
+    error: Error | null;
+    refetch: () => Promise<void>;
+}
+
+const useUsers = (url: string = apiUrl("/v1/patients")): UseUsersResult => {
+    const [users, setUsers] = useState<Patient[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<Error | null>(null);
 
     const fetchUsers = async () => {
         try {
@@ -17,9 +25,9 @@ const useUsers = (url = apiUrl("/v1/patients")) => {
             const responseData = await response.json();
             setUsers(responseData.items);
 
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error fetching data:", err);
-            setError(err);
+            setError(err instanceof Error ? err : new Error(String(err)));
             setUsers([]);
         } finally {
             setIsLoading(false);

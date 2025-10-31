@@ -1,6 +1,13 @@
 "use client";
 
-export default function NextPartModal({ isOpen, onNext }) {
+import React from 'react';
+
+interface NextPartModalProps {
+    isOpen: boolean;
+    onNext: () => void;
+}
+
+export default function NextPartModal({ isOpen, onNext }: NextPartModalProps): React.ReactNode {
     if (!isOpen) return null;
 
     return (

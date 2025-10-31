@@ -1,10 +1,21 @@
 import { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 
-const useCSVData = (filePath) => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+interface CSVItem {
+    time_sec: number;
+    value: number;
+}
+
+interface UseCSVDataResult {
+    data: CSVItem[];
+    loading: boolean;
+    error: string | null;
+}
+
+const useCSVData = (filePath: string): UseCSVDataResult => {
+    const [data, setData] = useState<CSVItem[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -20,20 +31,20 @@ const useCSVData = (filePath) => {
                     dynamicTyping: true,
                     skipEmptyLines: true,
                     complete: (results) => {
-                        const parsedData = results.data.map((item) => ({
+                        const parsedData = (results.data as any[]).map((item) => ({
                             time_sec: item.time_sec,
                             value: item.value,
                         }));
                         setData(parsedData);
                         setLoading(false);
                     },
-                    error: (err) => {
+                    error: (err: Error) => {
                         setError(err.message);
                         setLoading(false);
                     }
                 });
 
-            } catch (e) {
+            } catch (e: any) {
                 setError(e.message);
                 setLoading(false);
             }

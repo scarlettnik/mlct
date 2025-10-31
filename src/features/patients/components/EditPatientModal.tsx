@@ -4,8 +4,34 @@ import React, { useState, useEffect } from 'react';
 import "@/shared/ui/Modal.css";
 import { useParams } from "next/navigation";
 import { apiUrl } from "@/shared/api/api";
+import type { Patient } from "@/shared/api/types";
 
-const FIXED_BGA_PARAMS = [
+interface BGAParam {
+    parameter: string;
+    apiName: string;
+    unit: string;
+}
+
+interface FormData {
+    name: string;
+    info: {
+        parity: string;
+        last_menstrual_period: string;
+        somatic_diseases: string;
+        pregnancy_course: string;
+        blood_gas: Array<BGAParam & { value: string; name: string }>;
+    };
+}
+
+interface EditPatientModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    patientData?: Patient;
+    successAdd?: () => void;
+    onSuccess?: () => void;
+}
+
+const FIXED_BGA_PARAMS: BGAParam[] = [
     { parameter: "pH", apiName: "pH", unit: "" },
     { parameter: "CO2", apiName: "CO2", unit: "mmHg" },
     { parameter: "Glu", apiName: "Glu", unit: "mg/dL" },
@@ -13,7 +39,7 @@ const FIXED_BGA_PARAMS = [
     { parameter: "BE", apiName: "BE", unit: "mmol/L" },
 ];
 
-const formatDataForApi = (data) => {
+const formatDataForApi = (data: FormData) => {
     return {
         misc_data: {
             name: data.name,
@@ -31,8 +57,8 @@ const formatDataForApi = (data) => {
     };
 };
 
-const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess }) => {
-    const [formData, setFormData] = useState(null);
+const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess }: EditPatientModalProps): React.ReactNode => {
+    const [formData, setFormData] = useState<FormData | null>(null);
     const params = useParams();
 
     useEffect(() => {
@@ -77,7 +103,7 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
 
     if (!isOpen || !formData) return null;
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
         if (name.startsWith('bga_')) {
@@ -92,7 +118,7 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!formData.name.trim()) {
@@ -111,11 +137,12 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
         }
         const apiData = formatDataForApi(formData);
 
-        const isUpdate = !!params?.id;
+        const id = params?.id as string | undefined;
+        const isUpdate = !!id;
         const method = isUpdate ? 'PATCH' : 'POST';
 
         const url = isUpdate
-            ? apiUrl(`/v1/patients/${params?.id}`)
+            ? apiUrl(`/v1/patients/${id}`)
             : apiUrl("/v1/patients");
 
         try {
@@ -138,7 +165,7 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
                 onClose();
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(`Ошибка при сохранении:`, error);
             alert(`Не удалось сохранить данные: ${error.message}`);
         }
@@ -176,12 +203,12 @@ const EditPatientModal = ({ isOpen, onClose, patientData, successAdd, onSuccess 
 
 
                         <label>Соматические заболевания:</label>
-                        <textarea name="somatic_diseases" rows="3"
+                        <textarea name="somatic_diseases" rows={3}
                                   value={formData?.info?.somatic_diseases || ''}
                                   onChange={handleChange}/>
 
                         <label>Течение беременности:</label>
-                        <textarea name="pregnancy_course" rows="5"
+                        <textarea name="pregnancy_course" rows={5}
                                   value={formData?.info?.pregnancy_course || ''}
                                   onChange={handleChange}/>
                     </fieldset>

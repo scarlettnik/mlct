@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+'use client';
+
+import React, { useState, useEffect, type JSX } from "react";
 import VirtualKeyboard from "@/shared/ui/VirtualKeyBoard";
 import "./UploadModal.css";
 
@@ -8,6 +10,22 @@ const initialDefaultSettings = {
     volume: 80,
 };
 
+interface HRTSettings {
+    minHRT: number;
+    maxHRT: number;
+    volume: number;
+}
+
+interface HRTSettingsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    currentHRT?: number;
+    onSave: (minHRT: number, maxHRT: number, volume: number) => void;
+    initialMinHRT?: number;
+    initialMaxHRT?: number;
+    initialVolume?: number;
+}
+
 export default function HRTSettingsModal({
                                              isOpen,
                                              onClose,
@@ -16,8 +34,8 @@ export default function HRTSettingsModal({
                                              initialMinHRT = initialDefaultSettings.minHRT,
                                              initialMaxHRT = initialDefaultSettings.maxHRT,
                                              initialVolume = initialDefaultSettings.volume,
-                                         }) {
-    const [settings, setSettings] = useState(() => ({
+                                         }: HRTSettingsModalProps): JSX.Element | null {
+    const [settings, setSettings] = useState<HRTSettings>(() => ({
         minHRT: initialMinHRT,
         maxHRT: initialMaxHRT,
         volume: initialVolume,
@@ -31,10 +49,9 @@ export default function HRTSettingsModal({
         });
     }, [initialMinHRT, initialMaxHRT, initialVolume]);
 
-
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-    const [activeInput, setActiveInput] = useState(null);
-    const [message, setMessage] = useState("");
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+    const [activeInput, setActiveInput] = useState<keyof HRTSettings | null>(null);
+    const [message, setMessage] = useState<string>("");
 
     if (!isOpen) {
         return null;
@@ -43,13 +60,12 @@ export default function HRTSettingsModal({
     const isAlertCondition = currentHRT > 0 &&
         (currentHRT < settings.minHRT || currentHRT > settings.maxHRT);
 
-
-    const handleNativeInputChange = (e) => {
+    const handleNativeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         const numericVal = value.replace(/[^0-9]/g, '');
 
         let finalValue = parseInt(numericVal) || 0;
-        let maxLength = 3;
+        const maxLength = 3;
 
         if (numericVal.length > maxLength) return;
 
@@ -59,10 +75,12 @@ export default function HRTSettingsModal({
             finalValue = Math.max(0, Math.min(finalValue, 300));
         }
 
-        setSettings(prev => ({
-            ...prev,
-            [id]: finalValue,
-        }));
+        if (id === 'minHRT' || id === 'maxHRT' || id === 'volume') {
+            setSettings(prev => ({
+                ...prev,
+                [id]: finalValue,
+            }));
+        }
 
         if (activeInput) {
             setActiveInput(null);
@@ -70,12 +88,12 @@ export default function HRTSettingsModal({
         }
     };
 
-    const handleKeyUpdate = (newVal) => {
+    const handleKeyUpdate = (newVal: string) => {
         if (!activeInput) return;
 
         const numericVal = String(newVal).replace(/[^0-9]/g, '');
         let finalValue = parseInt(numericVal) || 0;
-        let maxLength = 3;
+        const maxLength = 3;
 
         if (numericVal.length > maxLength) return;
 
@@ -91,14 +109,13 @@ export default function HRTSettingsModal({
         }));
     };
 
-
-    const handleInputFocus = (inputName) => {
+    const handleInputFocus = (inputName: keyof HRTSettings) => {
         setActiveInput(inputName);
         setIsKeyboardVisible(true);
         setMessage("");
     };
 
-    const handleSave = (e) => {
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (settings.minHRT >= settings.maxHRT) {
