@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiUrl } from "@/shared/api/api";
 import type { Patient } from "@/shared/api/types";
 
@@ -16,7 +16,7 @@ const useUsers = (url: string = apiUrl("/v1/patients")): UseUsersResult => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -32,11 +32,11 @@ const useUsers = (url: string = apiUrl("/v1/patients")): UseUsersResult => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [url]);
 
     useEffect(() => {
         fetchUsers();
-    }, [url]);
+    }, [fetchUsers]);
 
     return { users, isLoading, error, refetch: fetchUsers };
 };
