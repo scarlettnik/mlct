@@ -1,6 +1,5 @@
 const nextConfig = {
-    reactStrictMode: true,
-    distDir: 'dist'
+    reactStrictMode: true
 };
 
 export default nextConfig;
